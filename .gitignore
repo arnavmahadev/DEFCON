@@ -1,0 +1,39 @@
+# Personal working notes / task tracker — never commit
+tasks.md
+
+# Data (private tracking data must never be committed; large files stay local)
+data/
+*.csv
+*.parquet
+*.h5
+*.hdf5
+
+# Model checkpoints & artifacts
+*.pt
+*.pth
+*.pkl
+*.joblib
+checkpoints/
+runs/
+wandb/
+mlruns/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Tooling / OS
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+.idea/
+.vscode/
