@@ -1,0 +1,340 @@
+[
+  {
+    "player": {
+      "id": "90101",
+      "nickname": "Alex Reds01"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "1",
+    "positionGroupType": "GK",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90102",
+      "nickname": "Sam Reds02"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "2",
+    "positionGroupType": "LB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90103",
+      "nickname": "Jordan Reds03"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "3",
+    "positionGroupType": "LCB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90104",
+      "nickname": "Casey Reds04"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "4",
+    "positionGroupType": "RCB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90105",
+      "nickname": "Riley Reds05"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "5",
+    "positionGroupType": "RB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90106",
+      "nickname": "Morgan Reds06"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "6",
+    "positionGroupType": "LCM",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90107",
+      "nickname": "Taylor Reds07"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "7",
+    "positionGroupType": "CM",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90108",
+      "nickname": "Jamie Reds08"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "8",
+    "positionGroupType": "RCM",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90109",
+      "nickname": "Drew Reds09"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "9",
+    "positionGroupType": "LW",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90110",
+      "nickname": "Quinn Reds10"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "10",
+    "positionGroupType": "CF",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90111",
+      "nickname": "Rowan Reds11"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "11",
+    "positionGroupType": "RW",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90112",
+      "nickname": "Blake Reds12"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "12",
+    "positionGroupType": "GK",
+    "started": false
+  },
+  {
+    "player": {
+      "id": "90113",
+      "nickname": "Reese Reds13"
+    },
+    "team": {
+      "id": "901",
+      "name": "Test United"
+    },
+    "shirtNumber": "13",
+    "positionGroupType": "LCB",
+    "started": false
+  },
+  {
+    "player": {
+      "id": "90201",
+      "nickname": "Alex Blues01"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "1",
+    "positionGroupType": "GK",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90202",
+      "nickname": "Sam Blues02"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "2",
+    "positionGroupType": "LB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90203",
+      "nickname": "Jordan Blues03"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "3",
+    "positionGroupType": "LCB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90204",
+      "nickname": "Casey Blues04"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "4",
+    "positionGroupType": "RCB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90205",
+      "nickname": "Riley Blues05"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "5",
+    "positionGroupType": "RB",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90206",
+      "nickname": "Morgan Blues06"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "6",
+    "positionGroupType": "LCM",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90207",
+      "nickname": "Taylor Blues07"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "7",
+    "positionGroupType": "CM",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90208",
+      "nickname": "Jamie Blues08"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "8",
+    "positionGroupType": "RCM",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90209",
+      "nickname": "Drew Blues09"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "9",
+    "positionGroupType": "LW",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90210",
+      "nickname": "Quinn Blues10"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "10",
+    "positionGroupType": "CF",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90211",
+      "nickname": "Rowan Blues11"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "11",
+    "positionGroupType": "RW",
+    "started": true
+  },
+  {
+    "player": {
+      "id": "90212",
+      "nickname": "Blake Blues12"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "12",
+    "positionGroupType": "GK",
+    "started": false
+  },
+  {
+    "player": {
+      "id": "90213",
+      "nickname": "Reese Blues13"
+    },
+    "team": {
+      "id": "902",
+      "name": "Fixture City"
+    },
+    "shirtNumber": "13",
+    "positionGroupType": "LCB",
+    "started": false
+  }
+]

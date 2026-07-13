@@ -7,6 +7,9 @@ data/
 *.parquet
 *.h5
 *.hdf5
+# ...but keep the small *synthetic* PFF-format test fixtures (our own data, not PFF's)
+!tests/data/
+!tests/data/**
 
 # Model checkpoints & artifacts
 *.pt
@@ -37,3 +40,6 @@ env/
 .DS_Store
 .idea/
 .vscode/
+
+# CatBoost training logs
+catboost_info/

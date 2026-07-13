@@ -1,0 +1,37 @@
+[
+  {
+    "id": "9001",
+    "season": "2099",
+    "week": 1,
+    "date": "2099-01-01T18:00:00",
+    "competition": {
+      "id": "99",
+      "name": "Synthetic Test League"
+    },
+    "homeTeam": {
+      "id": "901",
+      "name": "Test United",
+      "shortName": "TSU"
+    },
+    "awayTeam": {
+      "id": "902",
+      "name": "Fixture City",
+      "shortName": "FXC"
+    },
+    "homeTeamStartLeft": true,
+    "stadium": {
+      "id": "9",
+      "name": "Unit Test Arena",
+      "pitches": [
+        {
+          "id": "9",
+          "length": 105.0,
+          "width": 68.0,
+          "startDate": "2099-01-01",
+          "endDate": null
+        }
+      ]
+    },
+    "fps": 29.97
+  }
+]

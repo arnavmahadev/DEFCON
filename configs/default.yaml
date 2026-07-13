@@ -1,0 +1,93 @@
+# DEFCON default configuration.
+# Single source of truth for pitch geometry, kinematics, feature toggles,
+# model dimensions, training hyperparameters, and paths. Load via
+# `defcon.load_config()`. Changing a value here changes it everywhere.
+
+# ---------------------------------------------------------------------------
+# Pitch geometry (meters). Origin at pitch center; attacking team goes +x.
+# ---------------------------------------------------------------------------
+pitch:
+  length: 105.0          # touchline-to-touchline along x
+  width: 68.0            # goal-to-goal along y
+  goal_width: 7.32       # distance between the posts
+  # Attacking goal center is at (+length/2, 0); defending goal at (-length/2, 0).
+  # Goalposts (attacking goal) derived at runtime from length/2 and goal_width/2.
+
+# ---------------------------------------------------------------------------
+# Tracking / kinematics
+# ---------------------------------------------------------------------------
+tracking:
+  frame_rate: 25.0            # Hz (paper uses 25 Hz; Metrica sample is 25 Hz)
+  savgol_window: 13           # Savitzky-Golay window (odd; ~0.5s at 25Hz)
+  savgol_polyorder: 2         # polynomial order for smoothing before differencing
+  max_speed: 12.0             # m/s sanity cap for velocity
+  max_accel: 8.0              # m/s^2 sanity cap for acceleration
+
+# ---------------------------------------------------------------------------
+# Possession / labeling
+# ---------------------------------------------------------------------------
+labels:
+  horizon_events: 10          # "scores/concedes within next N events" (Sec 3.1)
+
+# ---------------------------------------------------------------------------
+# Feature engineering
+# ---------------------------------------------------------------------------
+features:
+  node_dim: 25                # base node feature vector length (Sec 3.1)
+  edge_dim: 2                 # [euclidean distance, same-team indicator]
+  responsibility_extra_dim: 1 # +1 "action of interest" indicator -> 26 for d1
+  nearby_opponent_radius: 3.0 # meters, "# opponents within 3m"
+  passing_corridor_width: 10.0 # meters, passing-line corridor total width
+
+# ---------------------------------------------------------------------------
+# Component-model architecture (GAT backbone + heads, Phase 3)
+# ---------------------------------------------------------------------------
+model:
+  hidden_dim: 64
+  heads: 4                    # GAT attention heads
+  n_layers: 2                 # Eq 18: GAT_theta2(GAT_theta1(X, E))
+  dropout: 0.2
+  mlp_hidden: 64              # head MLP hidden size
+
+# ---------------------------------------------------------------------------
+# Training harness (Phase 3.7)
+# ---------------------------------------------------------------------------
+training:
+  seed: 42
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 0.00001
+  max_epochs: 100
+  patience: 10                # early stopping patience (epochs)
+  val_fraction: 0.2
+  split_by: match             # never split within a match
+
+# ---------------------------------------------------------------------------
+# UxG model (Phase 3.6) — logistic regression on external Wyscout shots
+# ---------------------------------------------------------------------------
+uxg:
+  # 6 features: x, y relative to goal, distance, angle, is_set_piece, is_header
+  test_fraction: 0.2
+  seed: 42
+  C: 1.0                      # inverse regularization strength
+
+# ---------------------------------------------------------------------------
+# EPV / credit constants (Phase 4-5)
+# ---------------------------------------------------------------------------
+epv:
+  penalty_kick_epv: 0.7884    # fixed EPV for penalty-kick states (Sec 2.4e)
+
+# ---------------------------------------------------------------------------
+# Paths (relative to repo root unless absolute)
+# ---------------------------------------------------------------------------
+paths:
+  data_raw: data/raw
+  data_processed: data/processed
+  data_cache: data/cache
+  checkpoints: checkpoints
+  wyscout_dir: data/raw/wyscout
+  tracking_dir: data/raw/tracking
+
+# Primary tracking dataset chosen for this reproduction (task D.0).
+dataset:
+  tracking_source: metrica     # metrica | pff | skillcorner | statsbomb360
