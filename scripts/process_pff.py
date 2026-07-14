@@ -108,7 +108,7 @@ def main() -> int:
           f"{args.min_minutes:.0f} min) -> {out}")
 
     _leaderboards(table)
-    _market_value(table, cfg)
+    _market_value(table, cfg, n_games=len(matches))
     return 0
 
 
@@ -130,7 +130,7 @@ def _leaderboards(table: pd.DataFrame) -> None:
               [c for c in show if c != "intercept_p90"] + ["prevent_p90"]))
 
 
-def _market_value(table: pd.DataFrame, cfg) -> None:
+def _market_value(table: pd.DataFrame, cfg, n_games: int) -> None:
     from defcon.eval.market_value import (
         add_log_value,
         attach_transfermarkt,
@@ -167,7 +167,9 @@ def _market_value(table: pd.DataFrame, cfg) -> None:
     fig = repo_root() / "docs" / "img" / "pff_market_value.png"
     try:
         plot_value_scatter(add_log_value(joined), metric="prevent_p90",
-                           out_path=str(fig), annotate=True)
+                           out_path=str(fig), annotate=True,
+                           title=("Prevention credit (deter+disturb / 90) vs. market value\n"
+                                  f"2022 World Cup pilot: {n_games} games, {len(joined)} players"))
         print(f"[market value] scatter -> {fig}")
     except Exception as e:  # plotting is optional
         print(f"[market value] scatter skipped ({e})")

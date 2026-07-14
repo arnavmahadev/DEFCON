@@ -80,7 +80,7 @@ def main() -> None:
             s.ball_x, s.ball_y = xx, yy
             grid[j, i] = engine.state_epv(s)
     out = plot_epv_surface(gx, gy, grid, "docs/img/epv_surface.png", cfg, state=base,
-                           title="Expected Possession Value — carrier swept over pitch")
+                           title="Expected Possession Value: carrier swept over pitch")
     print(f"[epv] saved {out}  (surface range [{grid.min():.3f}, {grid.max():.3f}])")
 
 

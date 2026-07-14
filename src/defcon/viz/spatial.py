@@ -55,7 +55,7 @@ def plot_credit_zones(df: pd.DataFrame, out_path, cfg: Config | None = None,
                      color=_INK, fontsize=13, loc="left")
         ax.annotate("attack →", xy=(L / 2 - 16, -W / 2 - 1.5), color=_MUTED, fontsize=9)
 
-    fig.suptitle(title or "Where defensive credit is created — binned over pitch zones",
+    fig.suptitle(title or "Where defensive credit is created, binned over pitch zones",
                  color=_INK, fontsize=16, x=0.02, ha="left")
     plt.tight_layout(rect=(0, 0, 1, 0.97))
     plt.savefig(out_path, dpi=120, bbox_inches="tight", facecolor="#faf8f2")
@@ -100,7 +100,7 @@ def plot_pairwise(df: pd.DataFrame, out_path, cfg: Config | None = None,
     ax.set_yticklabels([str(d).replace("Player", "P") for d in defenders], fontsize=9)
     ax.set_xlabel("attacker (ball-carrier)", color=_MUTED)
     ax.set_ylabel("defender (credited)", color=_MUTED)
-    ax.set_title(title or "Pairwise credit — defender vs. attacker", color=_INK, fontsize=13, loc="left")
+    ax.set_title(title or "Pairwise credit: defender vs. attacker", color=_INK, fontsize=13, loc="left")
     for i in range(len(defenders)):
         for j in range(len(attackers)):
             v = mat.iloc[i, j]

@@ -58,7 +58,7 @@ def main() -> None:
     # ---- Figure-6 for game 1 ----
     fig = plot_credit_breakdown(per_match_tables[1], "docs/img/figure6_credit.png", cfg,
                                 top_n=14, suffix="",
-                                title="Defensive credit by player — Metrica Game 1")
+                                title="Defensive credit by player, Metrica Game 1")
     print(f"[agg] saved Figure-6 -> {fig}")
 
     # ---- season roll-up (2 matches) ----

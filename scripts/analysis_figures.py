@@ -50,12 +50,12 @@ def main() -> None:
 
     # 8.2 spatial zones
     z = plot_credit_zones(df, "docs/img/credit_zones.png", cfg,
-                          title=f"Where defensive credit is created — Game {args.game}")
+                          title=f"Where defensive credit is created, Game {args.game}")
     print(f"[8.2] saved {z}")
 
     # 8.3 pairwise matrix (defender x attacker)
     p = plot_pairwise(df[["defender", "attacker", "value"]], "docs/img/pairwise_matrix.png", cfg,
-                      top_k=10, title=f"Pairwise credit — defender vs. attacker (Game {args.game})")
+                      top_k=10, title=f"Pairwise credit: defender vs. attacker (Game {args.game})")
     print(f"[8.3] saved {p}")
     n_pairs = df.groupby(["defender", "attacker"]).ngroups
     print(f"[info] {len(df)} credit events over {n_pairs} defender-attacker pairs")

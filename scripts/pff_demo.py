@@ -238,7 +238,7 @@ def _render(state, weights, names, md, att_team, out_path, cfg):
                     zorder=5, path_effects=halo)
 
     ax.set_title(
-        f"Defender responsibility — {md.home_team_name} vs {md.away_team_name}, 2022 World Cup Final\n"
+        f"Defender responsibility: {md.home_team_name} vs {md.away_team_name}, 2022 World Cup Final\n"
         f"{att_name} in possession (blue); {dfd_name} defenders shaded by geometric responsibility",
         color="black", fontsize=11,
     )
