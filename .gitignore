@@ -2,7 +2,8 @@
 tasks.md
 
 # Data (private tracking data must never be committed; large files stay local)
-data/
+# Anchored to the repo root so it does NOT also swallow src/defcon/data/ (source).
+/data/
 *.csv
 *.parquet
 *.h5
