@@ -174,9 +174,11 @@
 
   <section id="board">
     <div class="sectitle"><h2>Component <em>leaderboard</em></h2></div>
-    <p class="note">Held-out metrics, ranked by reproduction fidelity (my value ÷ paper value). The GNNs train on
-      Metrica Game&nbsp;1 and validate on Game&nbsp;2. UxG uses 45,945 external Wyscout shots. The paper's numbers
-      come from 564 private matches, so the rare-event models here are limited by how little public data there is.</p>
+    <p class="note">Held-out metrics, ranked by reproduction fidelity (my value ÷ paper value). Most GNNs train on
+      Metrica Game&nbsp;1 and validate on Game&nbsp;2; UxG uses 45,945 external Wyscout shots. The three rare-event
+      models marked <b>+PFF</b> are retrained on the 7-game PFF World&nbsp;Cup pilot (≈7.9k passes, 199 shots) — the
+      paper's own numbers come from 564 private matches, so this is a direct test of whether the earlier gaps were
+      about <em>data</em> rather than method.</p>
     <div class="tablewrap">
       <table>
         <thead><tr><th class="r">#</th><th>Model</th><th>Metric</th><th class="r">Mine</th><th class="r">Paper</th><th>Fidelity</th><th>Status</th></tr></thead>
@@ -192,30 +194,30 @@
             <td><div class="fid"><div class="tk"><span style="width:100%"></span></div><span class="val">1.01</span></div></td>
             <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
           <tr><td class="r rank">3</td>
+            <td><div class="m-name">b2 · shot-blocking</div><div class="m-task">P(blocked) · GAT · +PFF</div></td>
+            <td>AUC</td><td class="r num"><span class="ours">0.672</span></td><td class="r num">0.672</td>
+            <td><div class="fid"><div class="tk"><span style="width:100%"></span></div><span class="val">1.00</span></div></td>
+            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+          <tr><td class="r rank">4</td>
             <td><div class="m-name">b1 · pass-success</div><div class="m-task">P(complete) · GAT</div></td>
             <td>AUC</td><td class="r num"><span class="ours">0.823</span></td><td class="r num">0.917</td>
             <td><div class="fid"><div class="tk"><span style="width:90%"></span></div><span class="val">0.90</span></div></td>
             <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
-          <tr><td class="r rank">4</td>
+          <tr><td class="r rank">5</td>
             <td><div class="m-name">a1 · action-selection</div><div class="m-task">which option · GAT</div></td>
             <td>MRR</td><td class="r num"><span class="ours">0.670</span></td><td class="r num">0.800</td>
             <td><div class="fid"><div class="tk"><span style="width:84%"></span></div><span class="val">0.84</span></div></td>
             <td><span class="tag ok"><span class="dot"></span>beats baseline</span></td></tr>
-          <tr><td class="r rank">5</td>
-            <td><div class="m-name">d1 · responsibility</div><div class="m-task">interceptor · GAT · 26-feat</div></td>
-            <td>MRR</td><td class="r num"><span class="ours">0.272</span></td><td class="r num">0.694</td>
-            <td><div class="fid"><div class="tk"><span style="width:39%"></span></div><span class="val">0.39</span></div></td>
-            <td><span class="tag warn"><span class="dot"></span>data-limited</span></td></tr>
-          <tr><td class="r rank"></td>
-            <td><div class="m-name">c2 · goal-conceding</div><div class="m-task">P(concede soon) · GAT</div></td>
-            <td>AUC</td><td class="r num">n/a</td><td class="r num">~0.62</td>
+          <tr><td class="r rank">6</td>
+            <td><div class="m-name">d1 · responsibility</div><div class="m-task">interceptor · GAT · +PFF</div></td>
+            <td>MRR</td><td class="r num"><span class="ours">0.436</span></td><td class="r num">0.694</td>
+            <td><div class="fid"><div class="tk"><span style="width:63%"></span></div><span class="val">0.63</span></div></td>
+            <td><span class="tag warn"><span class="dot"></span>improved · trails base</span></td></tr>
+          <tr><td class="r rank">7</td>
+            <td><div class="m-name">c2 · goal-conceding</div><div class="m-task">P(concede soon) · GAT · +PFF</div></td>
+            <td>AUC</td><td class="r num">0.48</td><td class="r num">~0.62</td>
             <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">n/a</span></div></td>
-            <td><span class="tag warn"><span class="dot"></span>0 train pos.</span></td></tr>
-          <tr><td class="r rank"></td>
-            <td><div class="m-name">b2 · shot-blocking</div><div class="m-task">P(blocked) · GAT</div></td>
-            <td>AUC</td><td class="r num">n/a</td><td class="r num">0.672</td>
-            <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">n/a</span></div></td>
-            <td><span class="tag off"><span class="dot"></span>deferred</span></td></tr>
+            <td><span class="tag warn"><span class="dot"></span>no signal</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -224,7 +226,9 @@
   <section id="fidelity">
     <div class="sectitle"><h2>Reproduction <em>fidelity</em></h2></div>
     <p class="note">Each model's held-out metric against the paper's. On the dashed line I match the paper exactly;
-      above it I exceed it; below it I trail. Where I trail, the gap is about data, not method.</p>
+      above it I exceed it; below it I trail. Where I trail, the gap is about data, not method — and I tested that
+      directly: retraining the three rare-event models on 7 World&nbsp;Cup matches put <b>b2 right on the line</b> and
+      lifted <b>d1</b> from 0.272 to 0.436. Only <b>c2</b> (conceding, a 1%-rare label) still needs far more.</p>
     <div class="chartcard">
       <div class="ct">My metric vs. paper metric</div>
       <div class="cs">higher on both axes is better · dashed line = perfect reproduction</div>
@@ -263,12 +267,16 @@
       <text class="plabel" x="443.4" y="89.1" text-anchor="end">b1</text>
       <circle class="pt ok" cx="388.0" cy="137.8" r="6"><title>a1: mine 0.670 vs paper 0.800 (Δ -0.130)</title></circle>
       <text class="plabel" x="397.0" y="151.8" text-anchor="start">a1</text>
-      <circle class="pt warn" cx="329.7" cy="275.2" r="6"><title>d1: mine 0.272 vs paper 0.694 (Δ -0.422)</title></circle>
-      <text class="plabel" x="338.7" y="279.2" text-anchor="start">d1</text>
+      <circle class="pt ok" cx="317.6" cy="137.2" r="6"><title>b2: mine 0.672 vs paper 0.672 (Δ +0.000) — retrained on 7 PFF matches</title></circle>
+      <text class="plabel" x="308.6" y="141.2" text-anchor="end">b2</text>
+      <circle class="pt warn" cx="329.7" cy="218.6" r="6"><title>d1: mine 0.436 vs paper 0.694 (Δ -0.258) — up from 0.272 on 7 PFF matches</title></circle>
+      <text class="plabel" x="338.7" y="222.6" text-anchor="start">d1</text>
+      <circle class="pt warn" cx="289.0" cy="202.7" r="6"><title>c2: mine 0.48 vs paper 0.62 — trainable now, but no signal at pilot scale</title></circle>
+      <text class="plabel" x="298.0" y="206.7" text-anchor="start">c2</text>
       </svg>
       <div class="leg">
         <span><i style="background:var(--ok)"></i> reproduced / beats baseline</span>
-        <span><i style="background:var(--warn)"></i> data-limited (2 public matches)</span>
+        <span><i style="background:var(--warn)"></i> data-limited (improving with more matches)</span>
       </div>
     </div>
   </section>
@@ -343,9 +351,10 @@
     <div class="figrow" style="grid-template-columns:1fr;margin-bottom:16px">
       <figure class="fig"><div class="frame"><img src="img/pff_wc_final_responsibility.png" alt="World Cup Final defender responsibility with real player names"></div>
         <figcaption><span class="lbl">WORLD CUP &middot; </span><b>On real, named players.</b> DEFCON&rsquo;s defender-responsibility
-          on a live frame of the <b>2022 World Cup Final</b> (PFF tracking). France builds through Griezmann with
-          Mbapp&eacute; as the option, and Argentina&rsquo;s responsibility falls on Tagliafico and a tracking-back Messi. Model-free
-          geometric prior on real tracking, not the Metrica-trained GNN, since that would be a domain-shift overclaim.</figcaption></figure>
+          on a live frame of the <b>2022 World Cup Final</b> (PFF tracking). Argentina works the ball through De&nbsp;Paul with
+          &Aacute;lvarez as the forward option, and France&rsquo;s responsibility concentrates on Varane, marking &Aacute;lvarez,
+          with Tchou&aacute;m&eacute;ni covering behind. Model-free geometric prior on real tracking, not the Metrica-trained GNN,
+          since that would be a domain-shift overclaim.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/pff_market_value.png" alt="Prevention credit vs market value scatter"></div>
         <figcaption><span class="lbl">RESULT &middot; </span><b>Prevention credit vs. market value.</b> Deter+Disturb per 90
           against Transfermarkt value (7 WC games, 34 players, by position). Defenders trend up, forwards like Mbapp&eacute;

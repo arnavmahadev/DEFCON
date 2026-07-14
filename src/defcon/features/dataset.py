@@ -20,6 +20,7 @@ __all__ = [
     "build_action_selection_graphs",
     "build_goal_condition_graphs",
     "build_responsibility_graphs",
+    "build_shot_blocking_graphs",
 ]
 
 
@@ -135,6 +136,79 @@ def build_goal_condition_graphs(actions, tracking, label_col: str, cfg: Config |
         data.obs_outcome = torch.tensor([1 if action["outcome"] == "success" else 0], dtype=torch.long)
         data.action_id = int(action["action_id"])
         graphs.append(data)
+    return graphs
+
+
+def build_shot_blocking_graphs(
+    actions,
+    tracking,
+    cfg: Config | None = None,
+    uxg=None,
+    augment: bool = False,
+    uxg_threshold: float = 0.05,
+    lane_half_width: float = 1.5,
+) -> list:
+    """Graphs for shot-blocking (b2): graph-level, ``y`` = the shot was blocked.
+
+    Real positives are shots with ``shot_outcome == 'B'`` (PFF blocked code); all
+    other shots are negatives. Shots are scarce and selection-biased (players do
+    not shoot into blocks), so with ``augment=True`` and a fitted UxG model we add
+    the paper's proxy positives (task 3.5): high-danger passes (UxG at the ball
+    location > ``uxg_threshold``) that had a defender standing in the ball->goal
+    lane — a shot there would very likely have been blocked. Proxy graphs are
+    tagged ``is_proxy = 1`` so they can be down-weighted or excluded at eval time.
+    """
+    from defcon.features.geometry import dist_point_to_segments, points_in_triangle
+
+    cfg = cfg or load_config()
+    directions, goalkeepers = _match_context(tracking, cfg)
+    graphs = []
+
+    def _state_graph(action, y, proxy):
+        state = graph_state_from_action(tracking, action, directions, goalkeepers, cfg)
+        if state is None:
+            return None
+        ng = build_node_features(state, cfg)
+        data = to_pyg_data(ng, cfg, y=float(y))
+        data.action_id = int(action["action_id"])
+        data.is_proxy = int(proxy)
+        return data, state
+
+    shots = actions[actions["type"] == "shot"]
+    for _, action in shots.iterrows():
+        y = 1.0 if str(action.get("shot_outcome")) == "B" else 0.0
+        res = _state_graph(action, y, proxy=False)
+        if res is not None:
+            graphs.append(res[0])
+
+    if augment and uxg is not None:
+        passes = actions[(actions["type"] == "pass")]
+        posts = None
+        for _, action in passes.iterrows():
+            res = _state_graph(action, 0.0, proxy=True)
+            if res is None:
+                continue
+            data, state = res
+            # UxG at the ball-carrier location (shift oriented coords to corner origin).
+            cx = state.px[state.carrier_idx] + cfg.pitch.length / 2.0
+            cy = state.py[state.carrier_idx] + cfg.pitch.width / 2.0
+            if float(uxg.score_location(cx, cy)) < uxg_threshold:
+                continue
+            # A defender standing in the ball->goal shooting lane blocks the shot.
+            posts = state.attacking_goalposts  # [[x, +h], [x, -h]] in oriented coords
+            bx, by = state.px[state.carrier_idx], state.py[state.carrier_idx]
+            dfd = np.flatnonzero(state.is_attacking == 0)
+            if len(dfd) == 0:
+                continue
+            in_tri = points_in_triangle(
+                state.px[dfd], state.py[dfd], bx, by, posts[0, 0], posts[0, 1], posts[1, 0], posts[1, 1])
+            gx, gy = state.attacking_goal_center
+            lane_d = dist_point_to_segments(state.px[dfd], state.py[dfd], bx, by, gx, gy)
+            blocked = bool(np.any(in_tri & (lane_d <= lane_half_width)))
+            if blocked:
+                data.y = data.y * 0 + 1.0  # relabel proxy as blocked
+                graphs.append(data)
+
     return graphs
 
 

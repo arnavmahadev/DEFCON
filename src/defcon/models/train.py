@@ -18,6 +18,7 @@ from defcon.config import Config, load_config
 __all__ = [
     "set_seed",
     "train_binary_node_model",
+    "train_binary_graph_model",
     "train_selection_model",
     "train_outcome_conditioned_model",
     "binary_metrics",
@@ -123,6 +124,94 @@ def train_binary_node_model(
                 ys.append(batch.y.cpu().numpy())
         probs = np.concatenate(probs)
         ys = np.concatenate(ys)
+        metrics = binary_metrics(ys, probs)
+        score = metrics.get(monitor, float("nan"))
+        history.append({"epoch": epoch, **metrics})
+
+        improved = (score > best_score) if higher_is_better else (score < best_score)
+        if not np.isnan(score) and improved:
+            best_score, best_epoch, best_metrics = score, epoch, metrics
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            bad = 0
+        else:
+            bad += 1
+        if verbose and epoch % 5 == 0:
+            print(f"  epoch {epoch:3d} | val {monitor}={score:.3f} f1={metrics['f1']:.3f} "
+                  f"brier={metrics['brier']:.3f}")
+        if bad >= patience:
+            break
+
+    if best_state is not None:
+        model.load_state_dict(best_state)
+    return TrainResult(best_metric=best_score, best_epoch=best_epoch,
+                       val_metrics=best_metrics, history=history)
+
+
+def train_binary_graph_model(
+    model,
+    train_graphs: list,
+    val_graphs: list,
+    cfg: Config | None = None,
+    pos_weight: float | None = None,
+    monitor: str = "auc",
+    verbose: bool = True,
+) -> TrainResult:
+    """Train a graph-level binary model (b2 shot-blocking, Eq 22).
+
+    The model mean-pools node embeddings to one logit per graph, trained with
+    ``BCEWithLogitsLoss`` against the graph label ``y``. Validation reports only
+    on real (non-proxy) graphs when an ``is_proxy`` flag is present, so augmented
+    proxy positives never inflate the reported metrics.
+    """
+    import torch
+    from torch_geometric.loader import DataLoader
+
+    cfg = cfg or load_config()
+    set_seed(cfg.training.seed)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    train_loader = DataLoader(train_graphs, batch_size=cfg.training.batch_size, shuffle=True)
+    val_loader = DataLoader(val_graphs, batch_size=cfg.training.batch_size)
+    opt = torch.optim.Adam(model.parameters(), lr=cfg.training.lr, weight_decay=cfg.training.weight_decay)
+    pw = torch.tensor([pos_weight], device=device) if pos_weight is not None else None
+    loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=pw)
+
+    higher_is_better = monitor in ("auc", "f1")
+    best_score = -np.inf if higher_is_better else np.inf
+    best_state = None
+    best_epoch = -1
+    best_metrics: dict = {}
+    history = []
+    patience = cfg.training.patience
+    bad = 0
+
+    for epoch in range(cfg.training.max_epochs):
+        model.train()
+        for batch in train_loader:
+            batch = batch.to(device)
+            opt.zero_grad()
+            logits = model(batch)  # (num_graphs,)
+            loss = loss_fn(logits, batch.y)
+            loss.backward()
+            opt.step()
+
+        model.eval()
+        probs, ys, real = [], [], []
+        with torch.no_grad():
+            for batch in val_loader:
+                batch = batch.to(device)
+                logits = model(batch)
+                probs.append(torch.sigmoid(logits).cpu().numpy())
+                ys.append(batch.y.cpu().numpy())
+                is_proxy = getattr(batch, "is_proxy", None)
+                real.append(np.zeros_like(ys[-1]) if is_proxy is None
+                            else (is_proxy.cpu().numpy() == 0).astype(float))
+        probs = np.concatenate(probs)
+        ys = np.concatenate(ys)
+        keep = np.concatenate(real).astype(bool)
+        if keep.any():  # evaluate on real shots only
+            probs, ys = probs[keep], ys[keep]
         metrics = binary_metrics(ys, probs)
         score = metrics.get(monitor, float("nan"))
         history.append({"epoch": epoch, **metrics})
