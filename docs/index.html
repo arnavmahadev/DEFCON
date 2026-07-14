@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DEFCON — Valuing Defense in Soccer, Reproduced</title>
-<meta name="description" content="An independent, test-driven reproduction of &quot;Better Prevent than Tackle&quot; (Kim et al.) — graph neural networks that value defense in soccer.">
+<title>DEFCON: Valuing Defense in Soccer, Reproduced</title>
+<meta name="description" content="An independent, test-driven reproduction of &quot;Better Prevent than Tackle&quot; (Kim et al.), which uses graph neural networks to value defense in soccer.">
 <meta name="color-scheme" content="light dark">
-<meta property="og:title" content="DEFCON — Valuing Defense in Soccer, Reproduced">
+<meta property="og:title" content="DEFCON: Valuing Defense in Soccer, Reproduced">
 <meta property="og:description" content="An independent, test-driven reproduction of a defensive-valuation GNN paper for soccer.">
 <meta property="og:type" content="website">
 <style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}</style>
@@ -184,7 +184,7 @@
   <header class="hero">
     <h1>Valuing defense,<br><em>reproduced</em></h1>
     <p class="tagline">An independent, test-driven reimplementation of “Better Prevent than Tackle”
-      (Kim&nbsp;et&nbsp;al.) — graph neural networks that value soccer defense.</p>
+      by Kim&nbsp;et&nbsp;al., which uses graph neural networks to value defense in soccer.</p>
     <div class="metarow">
       <div class="stat"><div class="k">Milestones</div><div class="v">5<small> / 7</small></div></div>
       <div class="stat"><div class="k">Tasks</div><div class="v">43<small> / 46</small></div></div>
@@ -197,9 +197,9 @@
 
   <section id="board">
     <div class="sectitle"><h2>Component <em>leaderboard</em></h2></div>
-    <p class="note">Held-out metrics, ranked by reproduction fidelity (our value ÷ paper value). GNNs train on
-      Metrica Game&nbsp;1 and validate on Game&nbsp;2; UxG uses 45,945 external Wyscout shots. The paper's numbers
-      come from 564 private matches — rare-event models here are honestly data-limited.</p>
+    <p class="note">Held-out metrics, ranked by reproduction fidelity (our value ÷ paper value). The GNNs train on
+      Metrica Game&nbsp;1 and validate on Game&nbsp;2. UxG uses 45,945 external Wyscout shots. The paper's numbers
+      come from 564 private matches, so the rare-event models here are limited by how little public data there is.</p>
     <div class="tablewrap">
       <table>
         <thead><tr><th class="r">#</th><th>Model</th><th>Metric</th><th class="r">Ours</th><th class="r">Paper</th><th>Fidelity</th><th>Status</th></tr></thead>
@@ -229,15 +229,15 @@
             <td>MRR</td><td class="r num"><span class="ours">0.272</span></td><td class="r num">0.694</td>
             <td><div class="fid"><div class="tk"><span style="width:39%"></span></div><span class="val">0.39</span></div></td>
             <td><span class="tag warn"><span class="dot"></span>data-limited</span></td></tr>
-          <tr><td class="r rank">—</td>
+          <tr><td class="r rank"></td>
             <td><div class="m-name">c2 · goal-conceding</div><div class="m-task">P(concede soon) · GAT</div></td>
-            <td>AUC</td><td class="r num">—</td><td class="r num">~0.62</td>
-            <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">—</span></div></td>
+            <td>AUC</td><td class="r num">n/a</td><td class="r num">~0.62</td>
+            <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">n/a</span></div></td>
             <td><span class="tag warn"><span class="dot"></span>0 train pos.</span></td></tr>
-          <tr><td class="r rank">—</td>
+          <tr><td class="r rank"></td>
             <td><div class="m-name">b2 · shot-blocking</div><div class="m-task">P(blocked) · GAT</div></td>
-            <td>AUC</td><td class="r num">—</td><td class="r num">0.672</td>
-            <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">—</span></div></td>
+            <td>AUC</td><td class="r num">n/a</td><td class="r num">0.672</td>
+            <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">n/a</span></div></td>
             <td><span class="tag off"><span class="dot"></span>deferred</span></td></tr>
         </tbody>
       </table>
@@ -247,7 +247,7 @@
   <section id="fidelity">
     <div class="sectitle"><h2>Reproduction <em>fidelity</em></h2></div>
     <p class="note">Each model's held-out metric against the paper's. On the dashed line we match the paper exactly;
-      above it we exceed it; below it we trail — and that gap is data, not method.</p>
+      above it we exceed it; below it we trail. Where we trail, the gap is about data, not method.</p>
     <div class="chartcard">
       <div class="ct">Our metric vs. paper metric</div>
       <div class="cs">higher on both axes is better · dashed line = perfect reproduction</div>
@@ -298,8 +298,8 @@
 
   <section id="baselines">
     <div class="sectitle"><h2>Backbone <em>baselines</em></h2></div>
-    <p class="note">The paper reports GAT beating GCN / GIN / boosting. On two public matches it does
-      <b>not</b> — GCN and boosting match or beat it. An honest scale effect: attention needs far more
+    <p class="note">The paper reports GAT beating GCN, GIN, and boosting. On two public matches it does
+      <b>not</b>. GCN and boosting match or beat it. It reads like a scale effect: attention needs a lot more
       data to pay off. Best per row in <span style="color:var(--accent-ink);font-weight:700">blue</span>.</p>
     <div class="tablewrap">
       <table>
@@ -318,26 +318,26 @@
                 border-radius:8px;background:var(--paper);padding:15px 18px">
       <div style="font-family:var(--serif);font-weight:600;font-size:15px;display:flex;align-items:center;gap:9px">
         <span style="width:9px;height:9px;border-radius:50%;background:#1baf7a;display:inline-block"></span>
-        &ldquo;Better prevent than tackle&rdquo; &mdash; reproduced (directionally) on a World Cup pilot
+        &ldquo;Better prevent than tackle&rdquo; holds up, directionally, on a World Cup pilot
       </div>
       <div style="color:var(--muted);font-size:13.5px;margin-top:7px;max-width:80ch">
         I ran the full credit pipeline over <b style="color:var(--ink)">7 knockout games (34 players)</b> of PFF&rsquo;s
         2022 World Cup tracking, joined <b style="color:var(--ink)">Transfermarkt</b> market values (Nov&nbsp;2022), and
         correlated each credit type against value. For <b style="color:var(--ink)">defenders</b>, the paper&rsquo;s core
-        pattern appears &mdash; value tracks <em>positioning</em>, not ball-winning:
+        pattern shows up: value tracks <em>positioning</em>, not ball-winning.
       </div>
       <div style="display:flex;gap:26px;margin:13px 0 4px;flex-wrap:wrap">
-        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">RAW INTERCEPT &rarr; VALUE</div>
+        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">RAW INTERCEPT vs VALUE</div>
           <div style="font-family:var(--serif);font-size:23px;color:var(--muted)">r = +0.02</div>
           <div style="font-size:11.5px;color:var(--muted)">ball-winning barely tracks value</div></div>
-        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">PREVENTION (DISTURB) &rarr; VALUE</div>
+        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">PREVENTION (DISTURB) vs VALUE</div>
           <div style="font-family:var(--serif);font-size:23px;color:#159868">r = +0.51</div>
           <div style="font-size:11.5px;color:var(--muted)">positioning strongly does</div></div>
       </div>
       <div style="color:var(--muted);font-size:12px;margin-top:8px;max-width:80ch;opacity:.85">
-        Caveats, stated plainly: EPV models are Metrica-trained (cross-provider domain shift &rarr; magnitudes
-        approximate), n&nbsp;=&nbsp;34 over 7 games (not the paper&rsquo;s 564) &mdash; <b>directional, not
-        statistically significant</b>; the <em>Concede-negative</em> half of the paper&rsquo;s claim does not cleanly
+        Caveats: the EPV models are trained on Metrica (cross-provider domain shift, so magnitudes
+        approximate), n&nbsp;=&nbsp;34 over 7 games (not the paper&rsquo;s 564), so this is <b>directional, not
+        statistically significant</b>. The <em>concede-negative</em> half of the paper&rsquo;s claim does not cleanly
         reproduce at this sample size.
       </div>
     </div>
@@ -349,35 +349,35 @@
     <div class="figrow" style="grid-template-columns:1fr;margin-bottom:16px">
       <figure class="fig"><div class="frame"><img src="img/pff_wc_final_responsibility.png" alt="World Cup Final defender responsibility with real player names"></div>
         <figcaption><span class="lbl">WORLD CUP &middot; </span><b>On real, named players.</b> DEFCON&rsquo;s defender-responsibility
-          on a live frame of the <b>2022 World Cup Final</b> (PFF tracking) &mdash; France building through Griezmann with
-          Mbapp&eacute; the option; Argentina&rsquo;s responsibility falls on Tagliafico and a tracking-back Messi. Model-free
-          geometric prior on real tracking (not the Metrica-trained GNN &mdash; that would be a domain-shift overclaim).</figcaption></figure>
+          on a live frame of the <b>2022 World Cup Final</b> (PFF tracking). France builds through Griezmann with
+          Mbapp&eacute; as the option, and Argentina&rsquo;s responsibility falls on Tagliafico and a tracking-back Messi. Model-free
+          geometric prior on real tracking, not the Metrica-trained GNN, since that would be a domain-shift overclaim.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/pff_market_value.png" alt="Prevention credit vs market value scatter"></div>
         <figcaption><span class="lbl">RESULT &middot; </span><b>Prevention credit vs. market value.</b> Deter+Disturb per 90
-          against Transfermarkt value (7 WC games, 34 players, by position). Defenders trend up; forwards like Mbapp&eacute;
-          sit low (prevention isn&rsquo;t their job); keepers at zero. r&nbsp;=&nbsp;+0.43 overall.</figcaption></figure>
+          against Transfermarkt value (7 WC games, 34 players, by position). Defenders trend up, forwards like Mbapp&eacute;
+          sit low because prevention isn&rsquo;t their job, and keepers sit at zero. r&nbsp;=&nbsp;+0.43 overall.</figcaption></figure>
     </div>
     <div class="figrow" style="grid-template-columns:1fr;margin-bottom:16px"><!--anchor-->
     <div class="figrow">
       <figure class="fig"><div class="frame"><img src="img/epv_surface.png" alt="EPV heatmap"></div>
-        <figcaption><span class="lbl">FIG 1 · </span><b>EPV surface.</b> Ball-carrier swept over a frame; peaks
-          in front of goal. Correlation with distance-to-goal <b>+0.91</b>.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 1 · </span><b>EPV surface.</b> The ball-carrier is swept over a frame, and value peaks
+          in front of goal. Correlation with distance-to-goal is <b>+0.91</b>.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/figure6_credit.png" alt="Defensive credit stacked bar"></div>
-        <figcaption><span class="lbl">FIG 2 · </span><b>Defensive credit.</b> Per-player Intercept / Disturb /
-          Deter (up) and Concede (down), with Net — the paper's Figure 6.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 2 · </span><b>Defensive credit.</b> Per-player Intercept, Disturb, and
+          Deter (up) plus Concede (down), with Net. This is the paper's Figure 6.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/frame_52000.png" alt="Tracking frame"></div>
-        <figcaption><span class="lbl">FIG 3 · </span><b>Parsed frame.</b> Raw Metrica CSV → 11v11, ball at feet,
+        <figcaption><span class="lbl">FIG 3 · </span><b>Parsed frame.</b> The raw Metrica CSV parsed into 11v11, ball at feet,
           keepers at opposite ends.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/responsibility.png" alt="Responsibility heatmap"></div>
-        <figcaption><span class="lbl">FIG 4 · </span><b>Responsibility.</b> On a failed pass, mass concentrates
-          on nearby defenders; the ball-winner carries 0.59.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 4 · </span><b>Responsibility.</b> On a failed pass, the mass concentrates
+          on nearby defenders, and the ball-winner carries 0.59.</figcaption></figure>
     </div>
     <div class="figrow" style="margin-top:16px">
       <figure class="fig"><div class="frame"><img src="img/pairwise_matrix.png" alt="Pairwise defender-attacker credit matrix"></div>
         <figcaption><span class="lbl">FIG 5 · </span><b>Pairwise credit.</b> Net credit each defender earned
           against each attacker (blue = gained). Who neutralizes whom.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/credit_zones.png" alt="Spatial credit heatmaps by category"></div>
-        <figcaption><span class="lbl">FIG 6 · </span><b>Credit by zone.</b> Where each category is created —
+        <figcaption><span class="lbl">FIG 6 · </span><b>Credit by zone.</b> Where each category is created.
           Concede clusters in the attacking third, Intercept/Deter through midfield.</figcaption></figure>
     </div>
   </section>
@@ -385,13 +385,13 @@
   <section id="progress">
     <div class="sectitle"><h2>Progress by <em>phase</em></h2></div>
     <div style="margin-top:8px">
-      <div class="prow"><span class="pid">0–2</span><span class="pn"><b>Setup · data pipeline · features</b> <small>· loaders, sync, 25-dim graphs</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">16/16</span></div>
+      <div class="prow"><span class="pid">0-2</span><span class="pn"><b>Setup · data pipeline · features</b> <small>· loaders, sync, 25-dim graphs</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">16/16</span></div>
       <div class="prow"><span class="pid">3</span><span class="pn"><b>Component models</b> <small>· 6 GNNs + UxG (b2 deferred)</small></span><span class="tk2"><span style="width:88%"></span></span><span class="frac">7/8</span></div>
       <div class="prow"><span class="pid">4</span><span class="pn"><b>EPV computation</b> <small>· per-option + state EPV</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">2/2</span></div>
       <div class="prow"><span class="pid">5</span><span class="pn"><b>Credit assignment</b> <small>· 7 rules, Figs 3 &amp; 5 exact</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">7/7</span></div>
       <div class="prow"><span class="pid">6</span><span class="pn"><b>Aggregation</b> <small>· per-90, Figure-6, season roll-up</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">2/2</span></div>
       <div class="prow"><span class="pid">7</span><span class="pn"><b>Evaluation</b> <small>· Table 3, baselines, rankings · market-value reproduced on a PFF World Cup pilot</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">4/4</span></div>
-      <div class="prow"><span class="pid">8–9</span><span class="pn"><b>Interactive apps · packaging</b> <small>· timeline, spatial + pairwise figures, README, demo</small></span><span class="tk2"><span style="width:71%"></span></span><span class="frac">5/7</span></div>
+      <div class="prow"><span class="pid">8-9</span><span class="pn"><b>Interactive apps · packaging</b> <small>· timeline, spatial + pairwise figures, README, demo</small></span><span class="tk2"><span style="width:71%"></span></span><span class="frac">5/7</span></div>
     </div>
   </section>
 
