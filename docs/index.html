@@ -140,26 +140,12 @@
   .fig figcaption b { font-family: var(--serif); color: var(--ink); font-weight: 600; }
   .fig .lbl { font-family: var(--mono); font-size: 10.5px; color: var(--accent); letter-spacing: .06em; }
 
-  /* progress list */
-  .prow { display: grid; grid-template-columns: 52px 1fr 140px 54px; gap: 16px; align-items: center;
-          padding: 13px 0; border-bottom: 1px solid var(--line); }
-  .prow:last-child { border-bottom: none; }
-  .prow .pid { font-family: var(--mono); font-weight: 600; color: var(--faint); font-size: 13px; }
-  .prow .pn { font-size: 14.5px; }
-  .prow .pn b { font-weight: 640; } .prow .pn small { color: var(--muted); }
-  .tk2 { height: 5px; background: var(--line-2); border-radius: 3px; overflow: hidden; }
-  .tk2 > span { display: block; height: 100%; background: var(--accent); }
-  .tk2.zero > span { background: var(--line-2); }
-  .frac { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--muted); text-align: right; }
-
   footer { padding: 26px 0 70px; font-size: 12.5px; color: var(--faint); display: flex;
            justify-content: space-between; gap: 16px; flex-wrap: wrap; border: none; }
 
   @media (max-width: 720px) {
     .figrow { grid-template-columns: 1fr; }
     .navlinks { display: none; }
-    .prow { grid-template-columns: 44px 1fr 52px; }
-    .prow .tk2 { display: none; }
     .pillnow { margin-left: 0; }
   }
 </style>
@@ -173,7 +159,6 @@
       <a href="#board">Leaderboard</a>
       <a href="#baselines">Baselines</a>
       <a href="#figures">Figures</a>
-      <a href="#progress">Progress</a>
       <a href="https://github.com/arnavmahadev/DEFCON">GitHub&nbsp;&#8599;</a>
     </span>
   </div>
@@ -189,12 +174,12 @@
 
   <section id="board">
     <div class="sectitle"><h2>Component <em>leaderboard</em></h2></div>
-    <p class="note">Held-out metrics, ranked by reproduction fidelity (our value ÷ paper value). The GNNs train on
+    <p class="note">Held-out metrics, ranked by reproduction fidelity (my value ÷ paper value). The GNNs train on
       Metrica Game&nbsp;1 and validate on Game&nbsp;2. UxG uses 45,945 external Wyscout shots. The paper's numbers
       come from 564 private matches, so the rare-event models here are limited by how little public data there is.</p>
     <div class="tablewrap">
       <table>
-        <thead><tr><th class="r">#</th><th>Model</th><th>Metric</th><th class="r">Ours</th><th class="r">Paper</th><th>Fidelity</th><th>Status</th></tr></thead>
+        <thead><tr><th class="r">#</th><th>Model</th><th>Metric</th><th class="r">Mine</th><th class="r">Paper</th><th>Fidelity</th><th>Status</th></tr></thead>
         <tbody>
           <tr><td class="r rank top">1</td>
             <td><div class="m-name">c1 · goal-scoring</div><div class="m-task">P(score soon) · GAT</div></td>
@@ -238,12 +223,12 @@
 
   <section id="fidelity">
     <div class="sectitle"><h2>Reproduction <em>fidelity</em></h2></div>
-    <p class="note">Each model's held-out metric against the paper's. On the dashed line we match the paper exactly;
-      above it we exceed it; below it we trail. Where we trail, the gap is about data, not method.</p>
+    <p class="note">Each model's held-out metric against the paper's. On the dashed line I match the paper exactly;
+      above it I exceed it; below it I trail. Where I trail, the gap is about data, not method.</p>
     <div class="chartcard">
-      <div class="ct">Our metric vs. paper metric</div>
+      <div class="ct">My metric vs. paper metric</div>
       <div class="cs">higher on both axes is better · dashed line = perfect reproduction</div>
-      <svg class="bm" viewBox="0 0 520 360" role="img" aria-label="Our metric versus paper metric">
+      <svg class="bm" viewBox="0 0 520 360" role="img" aria-label="My metric versus paper metric">
       <line class="grid" x1="58" y1="300.0" x2="498" y2="300.0"/>
       <line class="grid" x1="58.0" y1="24" x2="58.0" y2="300"/>
       <text class="tick" x="50" y="303.0" text-anchor="end">0.2</text>
@@ -269,16 +254,16 @@
       <line class="diag" x1="58.0" y1="300.0" x2="498.0" y2="24.0"/>
       <text class="diaglabel" x="459.5" y="42.2" text-anchor="end" transform="rotate(-33 459.5 42.2)">perfect reproduction</text>
       <text class="axlabel" x="278" y="332" text-anchor="middle">paper metric →</text>
-      <text class="axlabel" x="-162" y="15" text-anchor="middle" transform="rotate(-90 15 162)">our metric →</text>
-      <circle class="pt ok" cx="322.0" cy="110.6" r="6"><title>c1: ours 0.749 vs paper 0.680 (Δ +0.069)</title></circle>
+      <text class="axlabel" x="-162" y="15" text-anchor="middle" transform="rotate(-90 15 162)">my metric →</text>
+      <circle class="pt ok" cx="322.0" cy="110.6" r="6"><title>c1: mine 0.749 vs paper 0.680 (Δ +0.069)</title></circle>
       <text class="plabel" x="331.0" y="114.6" text-anchor="start">c1</text>
-      <circle class="pt ok" cx="374.2" cy="98.2" r="6"><title>UxG: ours 0.785 vs paper 0.775 (Δ +0.010)</title></circle>
+      <circle class="pt ok" cx="374.2" cy="98.2" r="6"><title>UxG: mine 0.785 vs paper 0.775 (Δ +0.010)</title></circle>
       <text class="plabel" x="383.2" y="89.2" text-anchor="start">UxG</text>
-      <circle class="pt ok" cx="452.4" cy="85.1" r="6"><title>b1: ours 0.823 vs paper 0.917 (Δ -0.094)</title></circle>
+      <circle class="pt ok" cx="452.4" cy="85.1" r="6"><title>b1: mine 0.823 vs paper 0.917 (Δ -0.094)</title></circle>
       <text class="plabel" x="443.4" y="89.1" text-anchor="end">b1</text>
-      <circle class="pt ok" cx="388.0" cy="137.8" r="6"><title>a1: ours 0.670 vs paper 0.800 (Δ -0.130)</title></circle>
+      <circle class="pt ok" cx="388.0" cy="137.8" r="6"><title>a1: mine 0.670 vs paper 0.800 (Δ -0.130)</title></circle>
       <text class="plabel" x="397.0" y="151.8" text-anchor="start">a1</text>
-      <circle class="pt warn" cx="329.7" cy="275.2" r="6"><title>d1: ours 0.272 vs paper 0.694 (Δ -0.422)</title></circle>
+      <circle class="pt warn" cx="329.7" cy="275.2" r="6"><title>d1: mine 0.272 vs paper 0.694 (Δ -0.422)</title></circle>
       <text class="plabel" x="338.7" y="279.2" text-anchor="start">d1</text>
       </svg>
       <div class="leg">
@@ -306,32 +291,49 @@
         </tbody>
       </table>
     </div>
-    <div style="margin-top:20px;border:1px solid var(--line);border-left:3px solid #1baf7a;
-                border-radius:8px;background:var(--paper);padding:15px 18px">
-      <div style="font-family:var(--serif);font-weight:600;font-size:15px;display:flex;align-items:center;gap:9px">
-        <span style="width:9px;height:9px;border-radius:50%;background:#1baf7a;display:inline-block"></span>
-        &ldquo;Better prevent than tackle&rdquo; holds up, directionally, on a World Cup pilot
+    <div style="margin-top:28px;padding-top:26px;border-top:1px solid var(--line)">
+      <div style="font-family:var(--serif);font-weight:600;font-size:16px;display:flex;align-items:center;gap:9px">
+        <span style="width:9px;height:9px;border-radius:50%;background:#1baf7a;display:inline-block;flex:none"></span>
+        A World Cup test of the paper&rsquo;s headline claim: defenders are valued for positioning, not for tackling
       </div>
-      <div style="color:var(--muted);font-size:13.5px;margin-top:7px;max-width:80ch">
-        I ran the full credit pipeline over <b style="color:var(--ink)">7 knockout games (34 players)</b> of PFF&rsquo;s
-        2022 World Cup tracking, joined <b style="color:var(--ink)">Transfermarkt</b> market values (Nov&nbsp;2022), and
-        correlated each credit type against value. For <b style="color:var(--ink)">defenders</b>, the paper&rsquo;s core
-        pattern shows up: value tracks <em>positioning</em>, not ball-winning.
+      <p style="color:var(--muted);font-size:14px;margin:11px 0 0;max-width:92ch">
+        I ran the full credit pipeline over <b style="color:var(--ink)">7 knockout games</b> of PFF&rsquo;s 2022 World Cup
+        tracking, covering <b style="color:var(--ink)">34 defenders</b>, and joined each player&rsquo;s
+        <b style="color:var(--ink)">Transfermarkt</b> market value from November&nbsp;2022. The question: which kind of
+        defending does the transfer market actually pay for? I compared two skills against value.
+      </p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px 40px;margin:24px 0 6px">
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div class="mono" style="font-size:10.5px;color:var(--faint);letter-spacing:.05em;text-transform:uppercase">Winning the ball &middot; tackles, interceptions</div>
+          <div style="display:flex;align-items:baseline;gap:13px">
+            <span style="font-family:var(--serif);font-size:30px;color:var(--muted);line-height:1">r = +0.02</span>
+            <span style="font-size:13px;color:var(--muted)">almost no link to value</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">Winning the ball back more often does not make a defender worth more.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div class="mono" style="font-size:10.5px;color:#159868;letter-spacing:.05em;text-transform:uppercase">Positioning &middot; cutting off danger early</div>
+          <div style="display:flex;align-items:baseline;gap:13px">
+            <span style="font-family:var(--serif);font-size:30px;color:#159868;line-height:1">r = +0.51</span>
+            <span style="font-size:13px;color:#159868">a clear positive link</span>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">Defenders who shut down danger before it develops are valued more highly.</div>
+        </div>
       </div>
-      <div style="display:flex;gap:26px;margin:13px 0 4px;flex-wrap:wrap">
-        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">RAW INTERCEPT vs VALUE</div>
-          <div style="font-family:var(--serif);font-size:23px;color:var(--muted)">r = +0.02</div>
-          <div style="font-size:11.5px;color:var(--muted)">ball-winning barely tracks value</div></div>
-        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">PREVENTION (DISTURB) vs VALUE</div>
-          <div style="font-family:var(--serif);font-size:23px;color:#159868">r = +0.51</div>
-          <div style="font-size:11.5px;color:var(--muted)">positioning strongly does</div></div>
-      </div>
-      <div style="color:var(--muted);font-size:12px;margin-top:8px;max-width:80ch;opacity:.85">
-        Caveats: the EPV models are trained on Metrica (cross-provider domain shift, so magnitudes
-        approximate), n&nbsp;=&nbsp;34 over 7 games (not the paper&rsquo;s 564), so this is <b>directional, not
-        statistically significant</b>. The <em>concede-negative</em> half of the paper&rsquo;s claim does not cleanly
-        reproduce at this sample size.
-      </div>
+
+      <p style="font-size:14px;color:var(--ink);margin:18px 0 0;max-width:92ch">
+        In short, the market pays defenders for <b>where they stand</b>, not for <b>how often they tackle</b>, which is
+        the paper&rsquo;s central claim. <span style="color:var(--muted)">(<span class="mono">r</span> is a correlation:
+        0 means no relationship, +1 means the two rise together in lockstep.)</span>
+      </p>
+
+      <p style="color:var(--muted);font-size:12.5px;margin:15px 0 0;max-width:92ch;opacity:.9">
+        Treat this as directional, not proven. The value models are trained on Metrica data, so cross-provider
+        differences leave the exact numbers approximate, and 34 players across 7 games is far short of the
+        paper&rsquo;s 564. The other half of the claim, that giving up danger should count against a defender,
+        did not reproduce cleanly at this sample size.
+      </p>
     </div>
   </section>
 
@@ -374,22 +376,8 @@
     </div>
   </section>
 
-  <section id="progress">
-    <div class="sectitle"><h2>Progress by <em>phase</em></h2></div>
-    <div style="margin-top:8px">
-      <div class="prow"><span class="pid">0-2</span><span class="pn"><b>Setup · data pipeline · features</b> <small>· loaders, sync, 25-dim graphs</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">16/16</span></div>
-      <div class="prow"><span class="pid">3</span><span class="pn"><b>Component models</b> <small>· 6 GNNs + UxG (b2 deferred)</small></span><span class="tk2"><span style="width:88%"></span></span><span class="frac">7/8</span></div>
-      <div class="prow"><span class="pid">4</span><span class="pn"><b>EPV computation</b> <small>· per-option + state EPV</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">2/2</span></div>
-      <div class="prow"><span class="pid">5</span><span class="pn"><b>Credit assignment</b> <small>· 7 rules, Figs 3 &amp; 5 exact</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">7/7</span></div>
-      <div class="prow"><span class="pid">6</span><span class="pn"><b>Aggregation</b> <small>· per-90, Figure-6, season roll-up</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">2/2</span></div>
-      <div class="prow"><span class="pid">7</span><span class="pn"><b>Evaluation</b> <small>· Table 3, baselines, rankings · market-value reproduced on a PFF World Cup pilot</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">4/4</span></div>
-      <div class="prow"><span class="pid">8-9</span><span class="pn"><b>Interactive apps · packaging</b> <small>· timeline, spatial + pairwise figures, README, demo</small></span><span class="tk2"><span style="width:71%"></span></span><span class="frac">5/7</span></div>
-    </div>
-  </section>
-
   <footer>
     <span>Unofficial educational reproduction. Not affiliated with the authors, KAIST, Fitogether, or AFC&nbsp;Ajax. No proprietary data used or redistributed.</span>
-    <span class="mono"><a href="https://github.com/arnavmahadev/DEFCON" style="color:inherit">github.com/arnavmahadev/DEFCON</a> · 43 / 46 tasks · 113 tests</span>
   </footer>
 
 </div>
