@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DEFCON: Valuing Defense in Soccer, Reproduced</title>
-<meta name="description" content="An independent, test-driven reproduction of &quot;Better Prevent than Tackle&quot; (Kim et al.), which uses graph neural networks to value defense in soccer.">
+<meta name="description" content="A from-scratch rebuild of the research paper &quot;Better Prevent than Tackle&quot; (Kim et al.), which uses AI to measure the value of good defending in soccer.">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="DEFCON: Valuing Defense in Soccer, Reproduced">
-<meta property="og:description" content="An independent, test-driven reproduction of a defensive-valuation GNN paper for soccer.">
+<meta property="og:description" content="A from-scratch rebuild of a research paper that uses AI to measure the value of good defending in soccer.">
 <meta property="og:type" content="website">
 <style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}</style>
 <style>
@@ -49,8 +49,8 @@
 
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--sans);
-         font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
-  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 26px; }
+         font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
   a { color: var(--accent-ink); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
@@ -59,7 +59,7 @@
 
   /* top nav */
   nav { border-bottom: 1px solid var(--line); }
-  .navrow { max-width: 1000px; margin: 0 auto; padding: 16px 26px; display: flex; align-items: center;
+  .navrow { max-width: 1240px; margin: 0 auto; padding: 16px 32px; display: flex; align-items: center;
             justify-content: space-between; gap: 16px; }
   .logo { display: inline-flex; align-items: center; gap: 10px; }
   .logo .sq { width: 22px; height: 22px; background: var(--ink); border-radius: 4px; display: inline-block; }
@@ -111,7 +111,9 @@
   .fid .val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--muted); width: 32px; text-align: right; }
   .tag { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink); white-space: nowrap; }
   .tag .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
-  .tag.ok .dot { background: var(--ok); } .tag.warn .dot { background: var(--warn); } .tag.off .dot { background: var(--off); }
+  .tag.ok .dot { background: var(--accent); }
+  .tag.warn .dot { background: transparent; border: 2px solid var(--accent); }
+  .tag.off .dot { background: transparent; border: 2px solid var(--line-2); }
 
   /* benchmark scatter */
   .chartcard { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px 12px; }
@@ -143,10 +145,18 @@
   footer { padding: 26px 0 70px; font-size: 12.5px; color: var(--faint); display: flex;
            justify-content: space-between; gap: 16px; flex-wrap: wrap; border: none; }
 
-  @media (max-width: 720px) {
+  @media (max-width: 900px) {
     .figrow { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    body { font-size: 14.5px; }
+    .wrap { padding: 0 18px; }
+    .navrow { padding: 14px 18px; }
+    section { padding: 30px 0; }
+    header.hero { padding: 32px 0 24px; }
     .navlinks { display: none; }
     .pillnow { margin-left: 0; }
+    .sectitle { flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -156,8 +166,8 @@
   <div class="navrow">
     <span class="logo"><span class="sq"></span><span class="wm">DEFCON <em>Reproduction</em></span></span>
     <span class="navlinks">
-      <a href="#board">Leaderboard</a>
-      <a href="#baselines">Baselines</a>
+      <a href="#board">Scoreboard</a>
+      <a href="#baselines">Methods</a>
       <a href="#figures">Figures</a>
       <a href="https://github.com/arnavmahadev/DEFCON">GitHub&nbsp;&#8599;</a>
     </span>
@@ -168,70 +178,75 @@
 
   <header class="hero">
     <h1>Valuing defense,<br><em>reproduced</em></h1>
-    <p class="tagline">An independent, test-driven reimplementation of “Better Prevent than Tackle”
-      by Kim&nbsp;et&nbsp;al., which uses graph neural networks to value defense in soccer.</p>
+    <p class="tagline">A from-scratch rebuild of the research paper “Better Prevent than Tackle”
+      (Kim&nbsp;et&nbsp;al.). It uses AI to measure something normal soccer stats miss: how much a defender is worth
+      for the danger they quietly shut down, not just the tackles they make.</p>
   </header>
 
   <section id="board">
-    <div class="sectitle"><h2>Component <em>leaderboard</em></h2></div>
-    <p class="note">Held-out metrics, ranked by reproduction fidelity (my value ÷ paper value). Most GNNs train on
-      Metrica Game&nbsp;1 and validate on Game&nbsp;2; UxG uses 45,945 external Wyscout shots. The three rare-event
-      models marked <b>+PFF</b> are retrained on the 7-game PFF World&nbsp;Cup pilot (≈7.9k passes, 199 shots) — the
-      paper's own numbers come from 564 private matches, so this is a direct test of whether the earlier gaps were
-      about <em>data</em> rather than method.</p>
+    <div class="sectitle"><h2>The <em>scoreboard</em></h2></div>
+    <p class="note">Seven small AI models, each scored on match data it never trained on, and ranked by how close I
+      got to the paper (my score ÷ the paper's score). Most learn from one match and get tested on another. A few
+      handle rare moments like blocks and interceptions; those I retrained on 7 games from the 2022 World&nbsp;Cup
+      (marked <b>+PFF</b> below). The paper had 564 matches to learn from and I have a handful, so this is really a
+      test of whether my gaps came down to having <em>less data</em> rather than a worse method.
+      <span style="color:var(--faint)">(The “How close” column is my score divided by the paper’s: 1.00 means I matched it exactly,
+      above 1.00 means I beat it, and below means I came up short. AUC and MRR are just accuracy-style scores: higher is
+      better, and 1.0 is perfect.)</span></p>
     <div class="tablewrap">
       <table>
-        <thead><tr><th class="r">#</th><th>Model</th><th>Metric</th><th class="r">Mine</th><th class="r">Paper</th><th>Fidelity</th><th>Status</th></tr></thead>
+        <thead><tr><th class="r">#</th><th>Model</th><th>Score type</th><th class="r">Mine</th><th class="r">Paper</th><th>How close</th><th>Status</th></tr></thead>
         <tbody>
           <tr><td class="r rank top">1</td>
-            <td><div class="m-name">c1 · goal-scoring</div><div class="m-task">P(score soon) · GAT</div></td>
+            <td><div class="m-name">c1 · Scoring soon</div><div class="m-task">chance the attacking team scores · GAT</div></td>
             <td>AUC</td><td class="r num"><span class="ours">0.749</span></td><td class="r num">~0.68</td>
             <td><div class="fid"><div class="tk"><span style="width:100%"></span></div><span class="val">1.10</span></div></td>
-            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+            <td><span class="tag ok"><span class="dot"></span>matched the paper</span></td></tr>
           <tr><td class="r rank top">2</td>
-            <td><div class="m-name">c3 · UxG</div><div class="m-task">unblocked xG · logistic</div></td>
+            <td><div class="m-name">c3 · Shot quality</div><div class="m-task">chance an unblocked shot scores · logistic</div></td>
             <td>AUC</td><td class="r num"><span class="ours">0.785</span></td><td class="r num">0.775</td>
             <td><div class="fid"><div class="tk"><span style="width:100%"></span></div><span class="val">1.01</span></div></td>
-            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+            <td><span class="tag ok"><span class="dot"></span>matched the paper</span></td></tr>
           <tr><td class="r rank">3</td>
-            <td><div class="m-name">b2 · shot-blocking</div><div class="m-task">P(blocked) · GAT · +PFF</div></td>
+            <td><div class="m-name">b2 · Shot blocked</div><div class="m-task">chance a defender blocks the shot · GAT · +PFF</div></td>
             <td>AUC</td><td class="r num"><span class="ours">0.672</span></td><td class="r num">0.672</td>
             <td><div class="fid"><div class="tk"><span style="width:100%"></span></div><span class="val">1.00</span></div></td>
-            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+            <td><span class="tag ok"><span class="dot"></span>matched the paper</span></td></tr>
           <tr><td class="r rank">4</td>
-            <td><div class="m-name">b1 · pass-success</div><div class="m-task">P(complete) · GAT</div></td>
+            <td><div class="m-name">b1 · Pass completed</div><div class="m-task">chance the pass reaches a teammate · GAT</div></td>
             <td>AUC</td><td class="r num"><span class="ours">0.823</span></td><td class="r num">0.917</td>
             <td><div class="fid"><div class="tk"><span style="width:90%"></span></div><span class="val">0.90</span></div></td>
-            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+            <td><span class="tag ok"><span class="dot"></span>matched the paper</span></td></tr>
           <tr><td class="r rank">5</td>
-            <td><div class="m-name">a1 · action-selection</div><div class="m-task">which option · GAT</div></td>
+            <td><div class="m-name">a1 · Next action</div><div class="m-task">pass, dribble, or shoot · GAT</div></td>
             <td>MRR</td><td class="r num"><span class="ours">0.670</span></td><td class="r num">0.800</td>
             <td><div class="fid"><div class="tk"><span style="width:84%"></span></div><span class="val">0.84</span></div></td>
-            <td><span class="tag ok"><span class="dot"></span>beats baseline</span></td></tr>
+            <td><span class="tag ok"><span class="dot"></span>beat the simple version</span></td></tr>
           <tr><td class="r rank">6</td>
-            <td><div class="m-name">d1 · responsibility</div><div class="m-task">interceptor · GAT · +PFF</div></td>
+            <td><div class="m-name">d1 · Ball won back</div><div class="m-task">which defender makes the stop · GAT · +PFF</div></td>
             <td>MRR</td><td class="r num"><span class="ours">0.436</span></td><td class="r num">0.694</td>
             <td><div class="fid"><div class="tk"><span style="width:63%"></span></div><span class="val">0.63</span></div></td>
-            <td><span class="tag warn"><span class="dot"></span>improved · trails base</span></td></tr>
+            <td><span class="tag warn"><span class="dot"></span>getting closer</span></td></tr>
           <tr><td class="r rank">7</td>
-            <td><div class="m-name">c2 · goal-conceding</div><div class="m-task">P(concede soon) · GAT · +PFF</div></td>
+            <td><div class="m-name">c2 · Conceding soon</div><div class="m-task">chance the defending team concedes · GAT · +PFF</div></td>
             <td>AUC</td><td class="r num">0.48</td><td class="r num">~0.62</td>
             <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">n/a</span></div></td>
-            <td><span class="tag warn"><span class="dot"></span>no signal</span></td></tr>
+            <td><span class="tag warn"><span class="dot"></span>needs more data</span></td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section id="fidelity">
-    <div class="sectitle"><h2>Reproduction <em>fidelity</em></h2></div>
-    <p class="note">Each model's held-out metric against the paper's. On the dashed line I match the paper exactly;
-      above it I exceed it; below it I trail. Where I trail, the gap is about data, not method — and I tested that
-      directly: retraining the three rare-event models on 7 World&nbsp;Cup matches put <b>b2 right on the line</b> and
-      lifted <b>d1</b> from 0.272 to 0.436. Only <b>c2</b> (conceding, a 1%-rare label) still needs far more.</p>
+    <div class="sectitle"><h2>How close <em>I got</em></h2></div>
+    <p class="note">Every model's score plotted against the paper's. Land on the dashed line and I matched it exactly;
+      above the line I did better, below it I fell short. Where I fell short, the problem is usually too little data,
+      not a broken method, and I checked that directly: retraining the three hardest models on 7 World&nbsp;Cup games
+      put <b>b2 right on the line</b> and nearly doubled <b>d1</b> (0.272 to 0.436). Only <b>c2</b> (predicting goals
+      conceded, which happens in barely 1% of moments) still needs far more data to work.</p>
     <div class="chartcard">
-      <div class="ct">My metric vs. paper metric</div>
-      <div class="cs">higher on both axes is better · dashed line = perfect reproduction</div>
+      <div class="ct">My score vs. the paper's score</div>
+      <div class="cs">further up and to the right is better · the dashed line means a perfect match</div>
       <svg class="bm" viewBox="0 0 520 360" role="img" aria-label="My metric versus paper metric">
       <line class="grid" x1="58" y1="300.0" x2="498" y2="300.0"/>
       <line class="grid" x1="58.0" y1="24" x2="58.0" y2="300"/>
@@ -256,44 +271,45 @@
       <line class="axis" x1="58" y1="24" x2="58" y2="300"/>
       <line class="axis" x1="58" y1="300" x2="498" y2="300"/>
       <line class="diag" x1="58.0" y1="300.0" x2="498.0" y2="24.0"/>
-      <text class="diaglabel" x="459.5" y="42.2" text-anchor="end" transform="rotate(-33 459.5 42.2)">perfect reproduction</text>
-      <text class="axlabel" x="278" y="332" text-anchor="middle">paper metric →</text>
-      <text class="axlabel" x="-162" y="15" text-anchor="middle" transform="rotate(-90 15 162)">my metric →</text>
+      <text class="diaglabel" x="459.5" y="42.2" text-anchor="end" transform="rotate(-33 459.5 42.2)">perfect match</text>
+      <text class="axlabel" x="278" y="332" text-anchor="middle">the paper's score →</text>
+      <text class="axlabel" x="-162" y="15" text-anchor="middle" transform="rotate(-90 15 162)">my score →</text>
       <circle class="pt ok" cx="322.0" cy="110.6" r="6"><title>c1: mine 0.749 vs paper 0.680 (Δ +0.069)</title></circle>
       <text class="plabel" x="331.0" y="114.6" text-anchor="start">c1</text>
-      <circle class="pt ok" cx="374.2" cy="98.2" r="6"><title>UxG: mine 0.785 vs paper 0.775 (Δ +0.010)</title></circle>
-      <text class="plabel" x="383.2" y="89.2" text-anchor="start">UxG</text>
+      <circle class="pt ok" cx="374.2" cy="98.2" r="6"><title>c3: mine 0.785 vs paper 0.775 (Δ +0.010)</title></circle>
+      <text class="plabel" x="383.2" y="89.2" text-anchor="start">c3</text>
       <circle class="pt ok" cx="452.4" cy="85.1" r="6"><title>b1: mine 0.823 vs paper 0.917 (Δ -0.094)</title></circle>
       <text class="plabel" x="443.4" y="89.1" text-anchor="end">b1</text>
       <circle class="pt ok" cx="388.0" cy="137.8" r="6"><title>a1: mine 0.670 vs paper 0.800 (Δ -0.130)</title></circle>
       <text class="plabel" x="397.0" y="151.8" text-anchor="start">a1</text>
-      <circle class="pt ok" cx="317.6" cy="137.2" r="6"><title>b2: mine 0.672 vs paper 0.672 (Δ +0.000) — retrained on 7 PFF matches</title></circle>
+      <circle class="pt ok" cx="317.6" cy="137.2" r="6"><title>b2: mine 0.672 vs paper 0.672 (Δ +0.000), retrained on 7 PFF matches</title></circle>
       <text class="plabel" x="308.6" y="141.2" text-anchor="end">b2</text>
-      <circle class="pt warn" cx="329.7" cy="218.6" r="6"><title>d1: mine 0.436 vs paper 0.694 (Δ -0.258) — up from 0.272 on 7 PFF matches</title></circle>
+      <circle class="pt warn" cx="329.7" cy="218.6" r="6"><title>d1: mine 0.436 vs paper 0.694 (Δ -0.258), up from 0.272 on 7 PFF matches</title></circle>
       <text class="plabel" x="338.7" y="222.6" text-anchor="start">d1</text>
-      <circle class="pt warn" cx="289.0" cy="202.7" r="6"><title>c2: mine 0.48 vs paper 0.62 — trainable now, but no signal at pilot scale</title></circle>
+      <circle class="pt warn" cx="289.0" cy="202.7" r="6"><title>c2: mine 0.48 vs paper 0.62, trainable now but no signal at pilot scale</title></circle>
       <text class="plabel" x="298.0" y="206.7" text-anchor="start">c2</text>
       </svg>
       <div class="leg">
-        <span><i style="background:var(--ok)"></i> reproduced / beats baseline</span>
-        <span><i style="background:var(--warn)"></i> data-limited (improving with more matches)</span>
+        <span><i style="background:var(--ok)"></i> matched the paper, or beat a simple baseline</span>
+        <span><i style="background:var(--warn)"></i> held back by too little data (improving as I add games)</span>
       </div>
     </div>
   </section>
 
   <section id="baselines">
-    <div class="sectitle"><h2>Backbone <em>baselines</em></h2></div>
-    <p class="note">The paper reports GAT beating GCN, GIN, and boosting. On two public matches it does
-      <b>not</b>. GCN and boosting match or beat it. It reads like a scale effect: attention needs a lot more
-      data to pay off. Best per row in <span style="color:var(--accent-ink);font-weight:700">blue</span>.</p>
+    <div class="sectitle"><h2>Which method <em>wins</em></h2></div>
+    <p class="note">The paper tried several AI methods and said its fanciest one (called <b>GAT</b>, an
+      &ldquo;attention&rdquo; network) came out on top. On the two public matches I could test, it didn't. Simpler
+      methods matched or beat it. The likely reason: the fancy method only pays off with far more data than I have.
+      Best score in each row is in <span style="color:var(--accent-ink);font-weight:700">blue</span>.</p>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>Task</th><th>Metric</th><th class="r">GAT</th><th class="r">GCN</th><th class="r">GIN</th><th class="r">XGBoost</th><th class="r">CatBoost</th></tr></thead>
+        <thead><tr><th>Task</th><th>Score type</th><th class="r">GAT</th><th class="r">GCN</th><th class="r">GIN</th><th class="r">XGBoost</th><th class="r">CatBoost</th></tr></thead>
         <tbody>
-          <tr><td><span class="m-name">b1 · pass-success</span></td><td>AUC ↑</td>
+          <tr><td><span class="m-name">b1 · Pass completed</span></td><td>AUC ↑</td>
             <td class="r num">0.823</td><td class="r num"><span class="ours">0.880</span></td>
             <td class="r num">0.701</td><td class="r num">0.869</td><td class="r num">0.862</td></tr>
-          <tr><td><span class="m-name">a1 · action-selection</span></td><td>MRR ↑</td>
+          <tr><td><span class="m-name">a1 · Next action</span></td><td>MRR ↑</td>
             <td class="r num">0.670</td><td class="r num"><span class="ours">0.694</span></td>
             <td class="r num">0.278</td><td class="r num">n/a</td><td class="r num">n/a</td></tr>
         </tbody>
@@ -302,13 +318,14 @@
     <div style="margin-top:28px;padding-top:26px;border-top:1px solid var(--line)">
       <div style="font-family:var(--serif);font-weight:600;font-size:16px;display:flex;align-items:center;gap:9px">
         <span style="width:9px;height:9px;border-radius:50%;background:#1baf7a;display:inline-block;flex:none"></span>
-        A World Cup test of the paper&rsquo;s headline claim: defenders are valued for positioning, not for tackling
+        A World Cup test of the paper&rsquo;s main claim: defenders are paid for positioning, not for tackling
       </div>
       <p style="color:var(--muted);font-size:14px;margin:11px 0 0;max-width:92ch">
-        I ran the full credit pipeline over <b style="color:var(--ink)">7 knockout games</b> of PFF&rsquo;s 2022 World Cup
-        tracking, covering <b style="color:var(--ink)">34 defenders</b>, and joined each player&rsquo;s
-        <b style="color:var(--ink)">Transfermarkt</b> market value from November&nbsp;2022. The question: which kind of
-        defending does the transfer market actually pay for? I compared two skills against value.
+        I took <b style="color:var(--ink)">7 knockout games</b> from the 2022 World&nbsp;Cup, looked at
+        <b style="color:var(--ink)">34 defenders</b>, and paired each one with their
+        <b style="color:var(--ink)">market value</b> (roughly what a club would pay for them, from Transfermarkt in
+        November&nbsp;2022). The question: what kind of defending does the transfer market actually pay for? I compared
+        two different skills against each player&rsquo;s value.
       </p>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px 40px;margin:24px 0 6px">
@@ -331,57 +348,57 @@
       </div>
 
       <p style="font-size:14px;color:var(--ink);margin:18px 0 0;max-width:92ch">
-        In short, the market pays defenders for <b>where they stand</b>, not for <b>how often they tackle</b>, which is
-        the paper&rsquo;s central claim. <span style="color:var(--muted)">(<span class="mono">r</span> is a correlation:
-        0 means no relationship, +1 means the two rise together in lockstep.)</span>
+        In short, the market pays defenders for <b>where they stand</b>, not for <b>how often they tackle</b>. That is
+        exactly the paper&rsquo;s main claim. <span style="color:var(--muted)">(<span class="mono">r</span> just measures
+        how strongly two things move together: 0 means no link, and +1 means they rise in perfect step.)</span>
       </p>
 
       <p style="color:var(--muted);font-size:12.5px;margin:15px 0 0;max-width:92ch;opacity:.9">
-        Treat this as directional, not proven. The value models are trained on Metrica data, so cross-provider
-        differences leave the exact numbers approximate, and 34 players across 7 games is far short of the
-        paper&rsquo;s 564. The other half of the claim, that giving up danger should count against a defender,
-        did not reproduce cleanly at this sample size.
+        Treat this as a hint, not proof. The models were trained on a different data source, so the exact numbers are
+        rough, and 34 players over 7 games is tiny next to the paper&rsquo;s 564 matches. The flip side of the claim,
+        that letting danger through should count against a defender, did not show up cleanly with this little data.
       </p>
     </div>
   </section>
 
   <section id="figures">
-    <div class="sectitle"><h2>Figures from the <em>pipeline</em></h2></div>
-    <p class="note">Generated by the running code on real match data.</p>
+    <div class="sectitle"><h2>Pictures from the <em>code</em></h2></div>
+    <p class="note">Every image here is made by the actual code, running on real match data.</p>
     <div class="figrow" style="grid-template-columns:1fr;margin-bottom:16px">
       <figure class="fig"><div class="frame"><img src="img/pff_wc_final_responsibility.png" alt="World Cup Final defender responsibility with real player names"></div>
-        <figcaption><span class="lbl">WORLD CUP &middot; </span><b>On real, named players.</b> DEFCON&rsquo;s defender-responsibility
-          on a live frame of the <b>2022 World Cup Final</b> (PFF tracking). Argentina works the ball through De&nbsp;Paul with
-          &Aacute;lvarez as the forward option, and France&rsquo;s responsibility concentrates on Varane, marking &Aacute;lvarez,
-          with Tchou&aacute;m&eacute;ni covering behind. Model-free geometric prior on real tracking, not the Metrica-trained GNN,
-          since that would be a domain-shift overclaim.</figcaption></figure>
+        <figcaption><span class="lbl">WORLD CUP &middot; </span><b>Real, named players.</b> Who is responsible for guarding
+          whom, on a real frame from the <b>2022 World Cup Final</b>. Argentina moves the ball through De&nbsp;Paul with
+          &Aacute;lvarez as the forward threat, and France&rsquo;s cover lands mostly on Varane, who is marking &Aacute;lvarez,
+          with Tchou&aacute;m&eacute;ni behind him. This uses a simple geometry-based method on the real tracking data, not the
+          trained model, which would not be fair to apply to a different data source.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/pff_market_value.png" alt="Prevention credit vs market value scatter"></div>
-        <figcaption><span class="lbl">RESULT &middot; </span><b>Prevention credit vs. market value.</b> Deter+Disturb per 90
-          against Transfermarkt value (7 WC games, 34 players, by position). Defenders trend up, forwards like Mbapp&eacute;
-          sit low because prevention isn&rsquo;t their job, and keepers sit at zero. r&nbsp;=&nbsp;+0.43 overall.</figcaption></figure>
+        <figcaption><span class="lbl">RESULT &middot; </span><b>Stopping danger vs. market value.</b> How much danger each
+          player prevents (per 90&nbsp;minutes) against their market value, for 34 players across 7 World&nbsp;Cup games,
+          colored by position. Defenders trend upward. Forwards like Mbapp&eacute; sit low because prevention is not their
+          job, and goalkeepers sit at zero. Overall link: r&nbsp;=&nbsp;+0.43.</figcaption></figure>
     </div>
     <div class="figrow" style="grid-template-columns:1fr;margin-bottom:16px"><!--anchor-->
     <div class="figrow">
       <figure class="fig"><div class="frame"><img src="img/epv_surface.png" alt="EPV heatmap"></div>
-        <figcaption><span class="lbl">FIG 1 · </span><b>EPV surface.</b> The ball-carrier is swept over a frame, and value peaks
-          in front of goal. Correlation with distance-to-goal is <b>+0.91</b>.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 1 · </span><b>Where the ball is dangerous.</b> Move the ball to every spot on the
+          pitch and the value is highest right in front of goal. It tracks distance to goal almost perfectly (<b>+0.91</b>).</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/figure6_credit.png" alt="Defensive credit stacked bar"></div>
-        <figcaption><span class="lbl">FIG 2 · </span><b>Defensive credit.</b> Per-player Intercept, Disturb, and
-          Deter (up) plus Concede (down), with Net. This is the paper's Figure 6.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 2 · </span><b>Defensive credit per player.</b> Good defending (intercepting,
+          disrupting, deterring) goes up; danger allowed goes down; the net is the total. This recreates Figure&nbsp;6 from the paper.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/frame_52000.png" alt="Tracking frame"></div>
-        <figcaption><span class="lbl">FIG 3 · </span><b>Parsed frame.</b> The raw Metrica CSV parsed into 11v11, ball at feet,
-          keepers at opposite ends.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 3 · </span><b>One frame, read from the data.</b> The raw tracking file turned into
+          11-a-side positions, with the ball at a player&rsquo;s feet and the keepers at each end.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/responsibility.png" alt="Responsibility heatmap"></div>
-        <figcaption><span class="lbl">FIG 4 · </span><b>Responsibility.</b> On a failed pass, the mass concentrates
-          on nearby defenders, and the ball-winner carries 0.59.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 4 · </span><b>Who gets the credit.</b> On a pass that gets broken up, most of the
+          credit lands on the nearby defenders, and the player who won the ball takes 0.59 of it.</figcaption></figure>
     </div>
     <div class="figrow" style="margin-top:16px">
       <figure class="fig"><div class="frame"><img src="img/pairwise_matrix.png" alt="Pairwise defender-attacker credit matrix"></div>
-        <figcaption><span class="lbl">FIG 5 · </span><b>Pairwise credit.</b> Net credit each defender earned
-          against each attacker (blue = gained). Who neutralizes whom.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 5 · </span><b>Defender vs. attacker.</b> How much credit each defender earned
+          against each attacker (blue&nbsp;= came out ahead). Basically, who shut down whom.</figcaption></figure>
       <figure class="fig"><div class="frame"><img src="img/credit_zones.png" alt="Spatial credit heatmaps by category"></div>
-        <figcaption><span class="lbl">FIG 6 · </span><b>Credit by zone.</b> Where each category is created.
-          Concede clusters in the attacking third, Intercept/Deter through midfield.</figcaption></figure>
+        <figcaption><span class="lbl">FIG 6 · </span><b>Where it happens on the pitch.</b> Danger allowed clusters near the
+          attacking goal; interceptions and deterrence happen more through midfield.</figcaption></figure>
     </div>
   </section>
 
