@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DEFCON — Valuing Defense in Soccer, Reproduced</title>
+<meta name="description" content="An independent, test-driven reproduction of &quot;Better Prevent than Tackle&quot; (Kim et al.) — graph neural networks that value defense in soccer.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="DEFCON — Valuing Defense in Soccer, Reproduced">
+<meta property="og:description" content="An independent, test-driven reproduction of a defensive-valuation GNN paper for soccer.">
+<meta property="og:type" content="website">
+<style>:root{color-scheme:light dark}body{margin:0}img{max-width:100%}</style>
+<style>
+  :root {
+    --cream: #f4f1ea; --paper: #faf8f2; --raise: #ffffff;
+    --ink: #1b1a17; --muted: #6f6a5c; --faint: #9a9284;
+    --line: #e5e0d3; --line-2: #d9d3c3;
+    --accent: #5c6f92; --accent-ink: #46587b;
+    --pill: #1b1a17; --pill-ink: #f4f1ea;
+    --ok: #3a9d78; --warn: #cf8636; --off: #a89f8b;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --cream: #1a1815; --paper: #211e1a; --raise: #26221d;
+      --ink: #ece6da; --muted: #a59d8c; --faint: #7b7364;
+      --line: #322e27; --line-2: #3e382f;
+      --accent: #95a4c5; --accent-ink: #aab7d5;
+      --pill: #ece6da; --pill-ink: #1a1815;
+      --ok: #4cb98d; --warn: #dc9a4c; --off: #8a8272;
+    }
+  }
+  :root[data-theme="light"] {
+    --cream: #f4f1ea; --paper: #faf8f2; --raise: #ffffff;
+    --ink: #1b1a17; --muted: #6f6a5c; --faint: #9a9284;
+    --line: #e5e0d3; --line-2: #d9d3c3;
+    --accent: #5c6f92; --accent-ink: #46587b; --pill: #1b1a17; --pill-ink: #f4f1ea;
+    --ok: #3a9d78; --warn: #cf8636; --off: #a89f8b;
+  }
+  :root[data-theme="dark"] {
+    --cream: #1a1815; --paper: #211e1a; --raise: #26221d;
+    --ink: #ece6da; --muted: #a59d8c; --faint: #7b7364;
+    --line: #322e27; --line-2: #3e382f;
+    --accent: #95a4c5; --accent-ink: #aab7d5; --pill: #ece6da; --pill-ink: #1a1815;
+    --ok: #4cb98d; --warn: #dc9a4c; --off: #8a8272;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--sans);
+         font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 26px; }
+  a { color: var(--accent-ink); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+             color: var(--faint); font-weight: 600; }
+
+  /* top nav */
+  nav { border-bottom: 1px solid var(--line); }
+  .navrow { max-width: 1000px; margin: 0 auto; padding: 16px 26px; display: flex; align-items: center;
+            justify-content: space-between; gap: 16px; }
+  .logo { display: inline-flex; align-items: center; gap: 10px; }
+  .logo .sq { width: 22px; height: 22px; background: var(--ink); border-radius: 4px; display: inline-block; }
+  .logo .wm { font-family: var(--serif); font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  .logo .wm em { font-style: italic; font-weight: 400; color: var(--muted); }
+  .navlinks { display: flex; gap: 22px; font-size: 14px; color: var(--muted); }
+  .navlinks a { color: var(--muted); }
+  .navlinks a:hover { color: var(--ink); text-decoration: none; }
+
+  /* hero */
+  header.hero { padding: 44px 0 30px; border-bottom: 1px solid var(--line); }
+  h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(38px, 6.4vw, 62px);
+       line-height: 1.02; letter-spacing: -.015em; margin: 0; }
+  h1 em { font-style: italic; color: var(--accent); font-weight: 500; }
+  .tagline { font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--muted);
+             margin: 14px 0 0; max-width: 60ch; }
+  .metarow { display: flex; flex-wrap: wrap; gap: 26px 34px; margin-top: 26px; align-items: flex-end; }
+  .metarow .stat .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .metarow .stat .v { font-family: var(--serif); font-size: 26px; font-weight: 600; margin-top: 3px; line-height: 1; }
+  .metarow .stat .v small { font-family: var(--sans); font-size: 13px; color: var(--muted); font-weight: 400; }
+  .pillnow { margin-left: auto; background: var(--pill); color: var(--pill-ink); font-family: var(--mono);
+             font-size: 12px; font-weight: 600; padding: 8px 15px; border-radius: 999px; letter-spacing: .02em; }
+
+  section { padding: 40px 0; border-bottom: 1px solid var(--line); }
+  .sectitle { display: flex; align-items: baseline; gap: 14px; margin: 0 0 6px; }
+  .sectitle h2 { font-family: var(--serif); font-size: 27px; font-weight: 600; letter-spacing: -.01em; margin: 0; }
+  .sectitle h2 em { font-style: italic; color: var(--accent); font-weight: 500; }
+  .note { color: var(--muted); font-size: 14px; margin: 2px 0 20px; max-width: 76ch; }
+
+  /* leaderboard */
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 680px; }
+  thead th { text-align: left; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em;
+             text-transform: uppercase; color: var(--faint); font-weight: 600; padding: 0 14px 11px;
+             border-bottom: 1px solid var(--line-2); }
+  thead th.r, tbody td.r { text-align: right; }
+  tbody td { padding: 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--paper); }
+  .rank { font-family: var(--serif); font-size: 18px; color: var(--faint); width: 30px; font-weight: 600; }
+  .rank.top { color: var(--accent); }
+  td .m-name { font-weight: 650; font-size: 14.5px; }
+  td .m-task { color: var(--muted); font-size: 12.5px; margin-top: 1px; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.num .ours { color: var(--accent-ink); font-weight: 700; }
+  .fid { display: flex; align-items: center; gap: 9px; min-width: 116px; }
+  .fid .tk { flex: 1; height: 5px; background: var(--line-2); border-radius: 3px; overflow: hidden; }
+  .fid .tk > span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+  .fid .val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--muted); width: 32px; text-align: right; }
+  .tag { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink); white-space: nowrap; }
+  .tag .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+  .tag.ok .dot { background: var(--ok); } .tag.warn .dot { background: var(--warn); } .tag.off .dot { background: var(--off); }
+
+  /* benchmark scatter */
+  .chartcard { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 20px 22px 12px; }
+  .chartcard .ct { font-family: var(--serif); font-weight: 600; font-size: 17px; }
+  .chartcard .cs { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  svg.bm { width: 100%; height: auto; display: block; margin-top: 8px; }
+  .bm .grid { stroke: var(--line); stroke-width: 1; }
+  .bm .axis { stroke: var(--line-2); stroke-width: 1; }
+  .bm .diag { stroke: var(--faint); stroke-width: 1.4; stroke-dasharray: 5 4; }
+  .bm .tick { fill: var(--faint); font-family: var(--mono); font-size: 10px; }
+  .bm .axlabel { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; }
+  .bm .pt { stroke: var(--paper); stroke-width: 2.5; }
+  .bm .pt.ok { fill: var(--ok); } .bm .pt.warn { fill: var(--warn); }
+  .bm .plabel { fill: var(--ink); font-family: var(--sans); font-size: 11px; font-weight: 650; }
+  .bm .diaglabel { fill: var(--faint); font-family: var(--serif); font-style: italic; font-size: 11px; }
+  .leg { display: flex; gap: 18px; margin: 8px 2px 2px; font-size: 12.5px; color: var(--muted); }
+  .leg span { display: inline-flex; align-items: center; gap: 7px; }
+  .leg i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+  /* figures */
+  .figrow { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  figure.fig { margin: 0; }
+  .fig .frame { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--raise); }
+  .fig img { width: 100%; height: auto; display: block; }
+  .fig figcaption { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+  .fig figcaption b { font-family: var(--serif); color: var(--ink); font-weight: 600; }
+  .fig .lbl { font-family: var(--mono); font-size: 10.5px; color: var(--accent); letter-spacing: .06em; }
+
+  /* progress list */
+  .prow { display: grid; grid-template-columns: 52px 1fr 140px 54px; gap: 16px; align-items: center;
+          padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .prow:last-child { border-bottom: none; }
+  .prow .pid { font-family: var(--mono); font-weight: 600; color: var(--faint); font-size: 13px; }
+  .prow .pn { font-size: 14.5px; }
+  .prow .pn b { font-weight: 640; } .prow .pn small { color: var(--muted); }
+  .tk2 { height: 5px; background: var(--line-2); border-radius: 3px; overflow: hidden; }
+  .tk2 > span { display: block; height: 100%; background: var(--accent); }
+  .tk2.zero > span { background: var(--line-2); }
+  .frac { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--muted); text-align: right; }
+
+  footer { padding: 26px 0 70px; font-size: 12.5px; color: var(--faint); display: flex;
+           justify-content: space-between; gap: 16px; flex-wrap: wrap; border: none; }
+
+  @media (max-width: 720px) {
+    .figrow { grid-template-columns: 1fr; }
+    .navlinks { display: none; }
+    .prow { grid-template-columns: 44px 1fr 52px; }
+    .prow .tk2 { display: none; }
+    .pillnow { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="navrow">
+    <span class="logo"><span class="sq"></span><span class="wm">DEFCON <em>Reproduction</em></span></span>
+    <span class="navlinks">
+      <a href="#board">Leaderboard</a>
+      <a href="#baselines">Baselines</a>
+      <a href="#figures">Figures</a>
+      <a href="#progress">Progress</a>
+      <a href="https://github.com/arnavmahadev/DEFCON">GitHub&nbsp;&#8599;</a>
+    </span>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <h1>Valuing defense,<br><em>reproduced</em></h1>
+    <p class="tagline">An independent, test-driven reimplementation of “Better Prevent than Tackle”
+      (Kim&nbsp;et&nbsp;al.) — graph neural networks that value soccer defense.</p>
+    <div class="metarow">
+      <div class="stat"><div class="k">Milestones</div><div class="v">5<small> / 7</small></div></div>
+      <div class="stat"><div class="k">Tasks</div><div class="v">43<small> / 46</small></div></div>
+      <div class="stat"><div class="k">Models</div><div class="v">6<small> / 7</small></div></div>
+      <div class="stat"><div class="k">Tests</div><div class="v">113<small> passing</small></div></div>
+      <div class="stat"><div class="k">Worked examples</div><div class="v">2<small> / 2 exact</small></div></div>
+      <span class="pillnow">M6 · validation</span>
+    </div>
+  </header>
+
+  <section id="board">
+    <div class="sectitle"><h2>Component <em>leaderboard</em></h2></div>
+    <p class="note">Held-out metrics, ranked by reproduction fidelity (our value ÷ paper value). GNNs train on
+      Metrica Game&nbsp;1 and validate on Game&nbsp;2; UxG uses 45,945 external Wyscout shots. The paper's numbers
+      come from 564 private matches — rare-event models here are honestly data-limited.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="r">#</th><th>Model</th><th>Metric</th><th class="r">Ours</th><th class="r">Paper</th><th>Fidelity</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="r rank top">1</td>
+            <td><div class="m-name">c1 · goal-scoring</div><div class="m-task">P(score soon) · GAT</div></td>
+            <td>AUC</td><td class="r num"><span class="ours">0.749</span></td><td class="r num">~0.68</td>
+            <td><div class="fid"><div class="tk"><span style="width:100%"></span></div><span class="val">1.10</span></div></td>
+            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+          <tr><td class="r rank top">2</td>
+            <td><div class="m-name">c3 · UxG</div><div class="m-task">unblocked xG · logistic</div></td>
+            <td>AUC</td><td class="r num"><span class="ours">0.785</span></td><td class="r num">0.775</td>
+            <td><div class="fid"><div class="tk"><span style="width:100%"></span></div><span class="val">1.01</span></div></td>
+            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+          <tr><td class="r rank">3</td>
+            <td><div class="m-name">b1 · pass-success</div><div class="m-task">P(complete) · GAT</div></td>
+            <td>AUC</td><td class="r num"><span class="ours">0.823</span></td><td class="r num">0.917</td>
+            <td><div class="fid"><div class="tk"><span style="width:90%"></span></div><span class="val">0.90</span></div></td>
+            <td><span class="tag ok"><span class="dot"></span>reproduced</span></td></tr>
+          <tr><td class="r rank">4</td>
+            <td><div class="m-name">a1 · action-selection</div><div class="m-task">which option · GAT</div></td>
+            <td>MRR</td><td class="r num"><span class="ours">0.670</span></td><td class="r num">0.800</td>
+            <td><div class="fid"><div class="tk"><span style="width:84%"></span></div><span class="val">0.84</span></div></td>
+            <td><span class="tag ok"><span class="dot"></span>beats baseline</span></td></tr>
+          <tr><td class="r rank">5</td>
+            <td><div class="m-name">d1 · responsibility</div><div class="m-task">interceptor · GAT · 26-feat</div></td>
+            <td>MRR</td><td class="r num"><span class="ours">0.272</span></td><td class="r num">0.694</td>
+            <td><div class="fid"><div class="tk"><span style="width:39%"></span></div><span class="val">0.39</span></div></td>
+            <td><span class="tag warn"><span class="dot"></span>data-limited</span></td></tr>
+          <tr><td class="r rank">—</td>
+            <td><div class="m-name">c2 · goal-conceding</div><div class="m-task">P(concede soon) · GAT</div></td>
+            <td>AUC</td><td class="r num">—</td><td class="r num">~0.62</td>
+            <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">—</span></div></td>
+            <td><span class="tag warn"><span class="dot"></span>0 train pos.</span></td></tr>
+          <tr><td class="r rank">—</td>
+            <td><div class="m-name">b2 · shot-blocking</div><div class="m-task">P(blocked) · GAT</div></td>
+            <td>AUC</td><td class="r num">—</td><td class="r num">0.672</td>
+            <td><div class="fid"><div class="tk"><span style="width:2%"></span></div><span class="val">—</span></div></td>
+            <td><span class="tag off"><span class="dot"></span>deferred</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="fidelity">
+    <div class="sectitle"><h2>Reproduction <em>fidelity</em></h2></div>
+    <p class="note">Each model's held-out metric against the paper's. On the dashed line we match the paper exactly;
+      above it we exceed it; below it we trail — and that gap is data, not method.</p>
+    <div class="chartcard">
+      <div class="ct">Our metric vs. paper metric</div>
+      <div class="cs">higher on both axes is better · dashed line = perfect reproduction</div>
+      <svg class="bm" viewBox="0 0 520 360" role="img" aria-label="Our metric versus paper metric">
+      <line class="grid" x1="58" y1="300.0" x2="498" y2="300.0"/>
+      <line class="grid" x1="58.0" y1="24" x2="58.0" y2="300"/>
+      <text class="tick" x="50" y="303.0" text-anchor="end">0.2</text>
+      <text class="tick" x="58.0" y="315" text-anchor="middle">0.2</text>
+      <line class="grid" x1="58" y1="231.0" x2="498" y2="231.0"/>
+      <line class="grid" x1="168.0" y1="24" x2="168.0" y2="300"/>
+      <text class="tick" x="50" y="234.0" text-anchor="end">0.4</text>
+      <text class="tick" x="168.0" y="315" text-anchor="middle">0.4</text>
+      <line class="grid" x1="58" y1="162.0" x2="498" y2="162.0"/>
+      <line class="grid" x1="278.0" y1="24" x2="278.0" y2="300"/>
+      <text class="tick" x="50" y="165.0" text-anchor="end">0.6</text>
+      <text class="tick" x="278.0" y="315" text-anchor="middle">0.6</text>
+      <line class="grid" x1="58" y1="93.0" x2="498" y2="93.0"/>
+      <line class="grid" x1="388.0" y1="24" x2="388.0" y2="300"/>
+      <text class="tick" x="50" y="96.0" text-anchor="end">0.8</text>
+      <text class="tick" x="388.0" y="315" text-anchor="middle">0.8</text>
+      <line class="grid" x1="58" y1="24.0" x2="498" y2="24.0"/>
+      <line class="grid" x1="498.0" y1="24" x2="498.0" y2="300"/>
+      <text class="tick" x="50" y="27.0" text-anchor="end">1.0</text>
+      <text class="tick" x="498.0" y="315" text-anchor="middle">1.0</text>
+      <line class="axis" x1="58" y1="24" x2="58" y2="300"/>
+      <line class="axis" x1="58" y1="300" x2="498" y2="300"/>
+      <line class="diag" x1="58.0" y1="300.0" x2="498.0" y2="24.0"/>
+      <text class="diaglabel" x="459.5" y="42.2" text-anchor="end" transform="rotate(-33 459.5 42.2)">perfect reproduction</text>
+      <text class="axlabel" x="278" y="332" text-anchor="middle">paper metric →</text>
+      <text class="axlabel" x="-162" y="15" text-anchor="middle" transform="rotate(-90 15 162)">our metric →</text>
+      <circle class="pt ok" cx="322.0" cy="110.6" r="6"><title>c1: ours 0.749 vs paper 0.680 (Δ +0.069)</title></circle>
+      <text class="plabel" x="331.0" y="114.6" text-anchor="start">c1</text>
+      <circle class="pt ok" cx="374.2" cy="98.2" r="6"><title>UxG: ours 0.785 vs paper 0.775 (Δ +0.010)</title></circle>
+      <text class="plabel" x="383.2" y="89.2" text-anchor="start">UxG</text>
+      <circle class="pt ok" cx="452.4" cy="85.1" r="6"><title>b1: ours 0.823 vs paper 0.917 (Δ -0.094)</title></circle>
+      <text class="plabel" x="443.4" y="89.1" text-anchor="end">b1</text>
+      <circle class="pt ok" cx="388.0" cy="137.8" r="6"><title>a1: ours 0.670 vs paper 0.800 (Δ -0.130)</title></circle>
+      <text class="plabel" x="397.0" y="151.8" text-anchor="start">a1</text>
+      <circle class="pt warn" cx="329.7" cy="275.2" r="6"><title>d1: ours 0.272 vs paper 0.694 (Δ -0.422)</title></circle>
+      <text class="plabel" x="338.7" y="279.2" text-anchor="start">d1</text>
+      </svg>
+      <div class="leg">
+        <span><i style="background:var(--ok)"></i> reproduced / beats baseline</span>
+        <span><i style="background:var(--warn)"></i> data-limited (2 public matches)</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="baselines">
+    <div class="sectitle"><h2>Backbone <em>baselines</em></h2></div>
+    <p class="note">The paper reports GAT beating GCN / GIN / boosting. On two public matches it does
+      <b>not</b> — GCN and boosting match or beat it. An honest scale effect: attention needs far more
+      data to pay off. Best per row in <span style="color:var(--accent-ink);font-weight:700">blue</span>.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Task</th><th>Metric</th><th class="r">GAT</th><th class="r">GCN</th><th class="r">GIN</th><th class="r">XGBoost</th><th class="r">CatBoost</th></tr></thead>
+        <tbody>
+          <tr><td><span class="m-name">b1 · pass-success</span></td><td>AUC ↑</td>
+            <td class="r num">0.823</td><td class="r num"><span class="ours">0.880</span></td>
+            <td class="r num">0.701</td><td class="r num">0.869</td><td class="r num">0.862</td></tr>
+          <tr><td><span class="m-name">a1 · action-selection</span></td><td>MRR ↑</td>
+            <td class="r num">0.670</td><td class="r num"><span class="ours">0.694</span></td>
+            <td class="r num">0.278</td><td class="r num">n/a</td><td class="r num">n/a</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:20px;border:1px solid var(--line);border-left:3px solid #1baf7a;
+                border-radius:8px;background:var(--paper);padding:15px 18px">
+      <div style="font-family:var(--serif);font-weight:600;font-size:15px;display:flex;align-items:center;gap:9px">
+        <span style="width:9px;height:9px;border-radius:50%;background:#1baf7a;display:inline-block"></span>
+        &ldquo;Better prevent than tackle&rdquo; &mdash; reproduced (directionally) on a World Cup pilot
+      </div>
+      <div style="color:var(--muted);font-size:13.5px;margin-top:7px;max-width:80ch">
+        I ran the full credit pipeline over <b style="color:var(--ink)">7 knockout games (34 players)</b> of PFF&rsquo;s
+        2022 World Cup tracking, joined <b style="color:var(--ink)">Transfermarkt</b> market values (Nov&nbsp;2022), and
+        correlated each credit type against value. For <b style="color:var(--ink)">defenders</b>, the paper&rsquo;s core
+        pattern appears &mdash; value tracks <em>positioning</em>, not ball-winning:
+      </div>
+      <div style="display:flex;gap:26px;margin:13px 0 4px;flex-wrap:wrap">
+        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">RAW INTERCEPT &rarr; VALUE</div>
+          <div style="font-family:var(--serif);font-size:23px;color:var(--muted)">r = +0.02</div>
+          <div style="font-size:11.5px;color:var(--muted)">ball-winning barely tracks value</div></div>
+        <div><div class="mono" style="font-size:10.5px;color:var(--muted);letter-spacing:.05em">PREVENTION (DISTURB) &rarr; VALUE</div>
+          <div style="font-family:var(--serif);font-size:23px;color:#159868">r = +0.51</div>
+          <div style="font-size:11.5px;color:var(--muted)">positioning strongly does</div></div>
+      </div>
+      <div style="color:var(--muted);font-size:12px;margin-top:8px;max-width:80ch;opacity:.85">
+        Caveats, stated plainly: EPV models are Metrica-trained (cross-provider domain shift &rarr; magnitudes
+        approximate), n&nbsp;=&nbsp;34 over 7 games (not the paper&rsquo;s 564) &mdash; <b>directional, not
+        statistically significant</b>; the <em>Concede-negative</em> half of the paper&rsquo;s claim does not cleanly
+        reproduce at this sample size.
+      </div>
+    </div>
+  </section>
+
+  <section id="figures">
+    <div class="sectitle"><h2>Figures from the <em>pipeline</em></h2></div>
+    <p class="note">Generated by the running code on real match data.</p>
+    <div class="figrow" style="grid-template-columns:1fr;margin-bottom:16px">
+      <figure class="fig"><div class="frame"><img src="img/pff_wc_final_responsibility.png" alt="World Cup Final defender responsibility with real player names"></div>
+        <figcaption><span class="lbl">WORLD CUP &middot; </span><b>On real, named players.</b> DEFCON&rsquo;s defender-responsibility
+          on a live frame of the <b>2022 World Cup Final</b> (PFF tracking) &mdash; France building through Griezmann with
+          Mbapp&eacute; the option; Argentina&rsquo;s responsibility falls on Tagliafico and a tracking-back Messi. Model-free
+          geometric prior on real tracking (not the Metrica-trained GNN &mdash; that would be a domain-shift overclaim).</figcaption></figure>
+      <figure class="fig"><div class="frame"><img src="img/pff_market_value.png" alt="Prevention credit vs market value scatter"></div>
+        <figcaption><span class="lbl">RESULT &middot; </span><b>Prevention credit vs. market value.</b> Deter+Disturb per 90
+          against Transfermarkt value (7 WC games, 34 players, by position). Defenders trend up; forwards like Mbapp&eacute;
+          sit low (prevention isn&rsquo;t their job); keepers at zero. r&nbsp;=&nbsp;+0.43 overall.</figcaption></figure>
+    </div>
+    <div class="figrow" style="grid-template-columns:1fr;margin-bottom:16px"><!--anchor-->
+    <div class="figrow">
+      <figure class="fig"><div class="frame"><img src="img/epv_surface.png" alt="EPV heatmap"></div>
+        <figcaption><span class="lbl">FIG 1 · </span><b>EPV surface.</b> Ball-carrier swept over a frame; peaks
+          in front of goal. Correlation with distance-to-goal <b>+0.91</b>.</figcaption></figure>
+      <figure class="fig"><div class="frame"><img src="img/figure6_credit.png" alt="Defensive credit stacked bar"></div>
+        <figcaption><span class="lbl">FIG 2 · </span><b>Defensive credit.</b> Per-player Intercept / Disturb /
+          Deter (up) and Concede (down), with Net — the paper's Figure 6.</figcaption></figure>
+      <figure class="fig"><div class="frame"><img src="img/frame_52000.png" alt="Tracking frame"></div>
+        <figcaption><span class="lbl">FIG 3 · </span><b>Parsed frame.</b> Raw Metrica CSV → 11v11, ball at feet,
+          keepers at opposite ends.</figcaption></figure>
+      <figure class="fig"><div class="frame"><img src="img/responsibility.png" alt="Responsibility heatmap"></div>
+        <figcaption><span class="lbl">FIG 4 · </span><b>Responsibility.</b> On a failed pass, mass concentrates
+          on nearby defenders; the ball-winner carries 0.59.</figcaption></figure>
+    </div>
+    <div class="figrow" style="margin-top:16px">
+      <figure class="fig"><div class="frame"><img src="img/pairwise_matrix.png" alt="Pairwise defender-attacker credit matrix"></div>
+        <figcaption><span class="lbl">FIG 5 · </span><b>Pairwise credit.</b> Net credit each defender earned
+          against each attacker (blue = gained). Who neutralizes whom.</figcaption></figure>
+      <figure class="fig"><div class="frame"><img src="img/credit_zones.png" alt="Spatial credit heatmaps by category"></div>
+        <figcaption><span class="lbl">FIG 6 · </span><b>Credit by zone.</b> Where each category is created —
+          Concede clusters in the attacking third, Intercept/Deter through midfield.</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="progress">
+    <div class="sectitle"><h2>Progress by <em>phase</em></h2></div>
+    <div style="margin-top:8px">
+      <div class="prow"><span class="pid">0–2</span><span class="pn"><b>Setup · data pipeline · features</b> <small>· loaders, sync, 25-dim graphs</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">16/16</span></div>
+      <div class="prow"><span class="pid">3</span><span class="pn"><b>Component models</b> <small>· 6 GNNs + UxG (b2 deferred)</small></span><span class="tk2"><span style="width:88%"></span></span><span class="frac">7/8</span></div>
+      <div class="prow"><span class="pid">4</span><span class="pn"><b>EPV computation</b> <small>· per-option + state EPV</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">2/2</span></div>
+      <div class="prow"><span class="pid">5</span><span class="pn"><b>Credit assignment</b> <small>· 7 rules, Figs 3 &amp; 5 exact</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">7/7</span></div>
+      <div class="prow"><span class="pid">6</span><span class="pn"><b>Aggregation</b> <small>· per-90, Figure-6, season roll-up</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">2/2</span></div>
+      <div class="prow"><span class="pid">7</span><span class="pn"><b>Evaluation</b> <small>· Table 3, baselines, rankings · market-value reproduced on a PFF World Cup pilot</small></span><span class="tk2"><span style="width:100%"></span></span><span class="frac">4/4</span></div>
+      <div class="prow"><span class="pid">8–9</span><span class="pn"><b>Interactive apps · packaging</b> <small>· timeline, spatial + pairwise figures, README, demo</small></span><span class="tk2"><span style="width:71%"></span></span><span class="frac">5/7</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Unofficial educational reproduction. Not affiliated with the authors, KAIST, Fitogether, or AFC&nbsp;Ajax. No proprietary data used or redistributed.</span>
+    <span class="mono"><a href="https://github.com/arnavmahadev/DEFCON" style="color:inherit">github.com/arnavmahadev/DEFCON</a> · 43 / 46 tasks · 113 tests</span>
+  </footer>
+
+</div>
+
+</body></html>
